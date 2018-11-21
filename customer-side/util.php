@@ -30,11 +30,9 @@ function sortIntoIndex($array) {
     for ($i = 1; i < $numOfElem; $i++) {
         $middle = $array[$i];
         $middle_s = $i;
-        for ($j = $i - 1; $j >= 0 ; $j--) {
-            if ($array[$j] > $middle) {
+        for ($j = $i - 1; $j >= 0 && $array[$j] > $middle; $j--) {
                 $array[$j + 1] = $array[$j]; 
                 $sorted[$j + 1] = $sorted[$j];
-            }
         } 
         $array[$j + 1] = $middle;
         $sorted[$j + 1] = $middle_s;
