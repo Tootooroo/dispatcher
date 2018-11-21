@@ -1,0 +1,16 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+$workers	.\customer-side\imgGen.php	/^$workers = array($/;"	v
+GetBinButton	.\customer-side\imgGen.js	/^var GetBinButton = document.querySelector(".GetBin");$/;"	v
+buildBin	.\customer-side\imgGen.js	/^function buildBin() {$/;"	f
+foreach	.\customer-side\imgGen.php	/^foreach ($workers as $address => $port) {$/;"	f
+getBin	.\customer-side\imgGen.js	/^function getBin() {$/;"	f
+isDone	.\customer-side\imgGen.js	/^var isDone = 0;$/;"	v
+release	.\customer-side\imgGen.js	/^var release = document.querySelector(".release");$/;"	v
+socket_err	.\customer-side\util.php	/^function socket_err($func) {$/;"	f
+submitButton	.\customer-side\imgGen.js	/^var submitButton = document.querySelector(".submit");$/;"	v
+targetImgUrl	.\customer-side\imgGen.js	/^var targetImgUrl;$/;"	v
