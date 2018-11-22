@@ -2,21 +2,24 @@
 
 <?php
 
+include "config.php"
+
 class Job {
     private $order;
     private $content;
     private $priority;
 
     public function setOrd($type_) { 
-    
+        $this->$order = $orderList[$type_];     
     }
 
     public function setContent($content_) { 
-    
+        $this->$content = $content_; 
     }
 
     public function jobStr() { 
-    
+        $jobStr = $pack("vH*", $this->$order, $this->$content_); 
+        return $jobStr;
     }
 }
 
@@ -58,8 +61,13 @@ class WorkerHouse {
         }
 
         // Second, make decision by the overhead of workers
+        $sorted = sortIntoIndex($overheadArray); 
+        $theWorker = $workersRef->offsetGet($sorted[0]); 
         
- 
+        $ret = $theWorker->doJob($job);  
+        if ($ret != 0)
+           return -1; 
+        return 0;
     }
 
     public function houseEnter($worker) {

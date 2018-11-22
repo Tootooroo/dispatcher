@@ -37,5 +37,6 @@ function sortIntoIndex($array) {
         $array[$j + 1] = $middle;
         $sorted[$j + 1] = $middle_s;
     }
+    return $sorted;
 }
 
