@@ -20,7 +20,7 @@ class Job {
     }
 
     public function setOrd($type_) { 
-        $this->$order = $orderType[$type_];     
+        $this->$order = $type_;     
     }
 
     public function getContent() {
@@ -56,8 +56,17 @@ class WorkerHouse {
         1 => 'overHeadDispatch' 
     );
     
-    function __construct($disMethod_) {
+    function __construct($disMethod_, $workerSet) {
         $this->$disMethod = $disMethod_; 
+
+        foreach ($workerSet as $worker) {
+            $worker = new Worker($worker[HostIdx], $worker[PortIdx]);
+            $this->houseEnter($worker); 
+            if ($worker->connect()) {
+                // Connect error set the state of worker to unknow
+                $worker->setState(WORKER_UNKNOWN_STATE); 
+            }
+        }
     }
 
     // Note: If multimaster exists you have better
@@ -89,7 +98,18 @@ class WorkerHouse {
 
         // Second, make decision by the overhead of workers
         $sorted = sortIntoIndex($overheadArray); 
-        $theWorker = $workersRef->offsetGet($sorted[0]); 
+        // Choose the worker have lowest overhead and useable.
+        $choosen = -1;
+        foreach ($sorted as $idx) {
+            if ($overheadArray[$idx] == -1)
+                continue;
+            $choosen = $idx; 
+        }  
+
+        // None of worker can handle the job.
+        if ($choosen == -1)
+            return -1;
+        $theWorker = $workersRef->offsetGet($choosen); 
         
         $ret = $theWorker->doJob($job);  
         if ($ret != 0)
@@ -98,8 +118,9 @@ class WorkerHouse {
     }
 
     public function houseEnter($worker) {
-        if ($worker) 
+        if ($worker) {
             $this->$workers->add(0, $worker);  
+        }
     }  
 
     public function houseExit($address) {
@@ -142,10 +163,12 @@ class Worker {
     private $ID;
     private $MAX_NUM_OF_JOBS;
     private $NUM_OF_PROCESSING_JOBS;
-    // 0: Free
-    // 1: Normal
-    // 2: Congested
-    // 3: Emergency
+
+    // 0: Unknow
+    // 1: Free
+    // 2: Normal
+    // 3: Congested
+    // 4: Emergency
     private $STATE;
 
     function __construct($address_, $port_) {
@@ -158,10 +181,16 @@ class Worker {
     }
 
     public function connect() {
-        if ($socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) === false)
+        $ret = 0;
+        if ($ret = $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) === false) {
             socket_err("socket_create()");
-        if (socket_connect($this->$socket, $this->$address, $this->$port) === false)
+            return $ret;
+        }
+        if ($ret = socket_connect($this->$socket, $this->$address, $this->$port) === false) {
             socket_err("socket_connect()"); 
+            return $ret;
+        }
+        return $ret;
     }
 
     public function getID() {
@@ -171,6 +200,11 @@ class Worker {
     public function overHead() {
         $overHeadSql = "SELECT overhead FROM worker where address = " . \
             $this->$address . ";"; 
+    
+        if ($this->$STATE == WORKER_UNKNOWN_STATE) {
+            return -1; 
+        } 
+
         $this->$row = oneRowFetch($overHeadSql, $this->$dbConn);
         $this->$NUM_OF_PROCESSING_JOBS = $row[1];
         $this->$MAX_NUM_OF_JOBS = $row[2];
@@ -188,6 +222,11 @@ class Worker {
 
     public function state() { 
         return $this->$STATE; 
+    }
+
+    public function setState($stateCode) {
+        $this->$STATE = $stateCode; 
+        return 0;
     }
 
     public function getMaxNumOfJobs() {
