@@ -9,8 +9,31 @@ class Job {
     private $content;
     private $priority;
 
+    function __construct($order_, $content_, $pri_) {
+        $this->$order = $order_; 
+        $this->$content = $content_;
+        $this->$priority = $pri_; 
+    }
+
+    public function getOrd() {
+        return $this->$order; 
+    }
+
     public function setOrd($type_) { 
-        $this->$order = $orderList[$type_];     
+        $this->$order = $orderType[$type_];     
+    }
+
+    public function getContent() {
+        return $this->$content; 
+    }
+
+    public function getPri() {
+        return $this->$priority; 
+    }    
+
+    public function setPri($pri) {
+        $this->$priority = $pri; 
+        return 0;
     }
 
     public function setContent($content_) { 
@@ -18,7 +41,7 @@ class Job {
     }
 
     public function jobStr() { 
-        $jobStr = $pack("vH*", $this->$order, $this->$content_); 
+        $jobStr = $pack("vvH*", $this->$order, $this->$priority, $this->$content_); 
         return $jobStr;
     }
 }
@@ -33,6 +56,10 @@ class WorkerHouse {
         1 => 'overHeadDispatch' 
     );
     
+    function __construct($disMethod_) {
+        $this->$disMethod = $disMethod_; 
+    }
+
     // Note: If multimaster exists you have better
     // not to use this dispatch method.
     private function rRobinDispatch($job) {
@@ -98,8 +125,10 @@ class WorkerHouse {
         }
 
         return -1;
-    }
+    } 
+    public function workerInfo($wID) {
     
+    }
 }
 
 class Worker {
@@ -110,6 +139,7 @@ class Worker {
     private $dbConn;  
 
     /* Management Purpose Infos */
+    private $ID;
     private $MAX_NUM_OF_JOBS;
     private $NUM_OF_PROCESSING_JOBS;
     // 0: Free
@@ -117,6 +147,11 @@ class Worker {
     // 2: Congested
     // 3: Emergency
     private $STATE;
+
+    function __construct($address_, $port_) {
+        $this->$address = $address_;
+        $this->$port = $port_;
+    }
 
     private function command($jobStr) { 
        socket_write($this->$socket, $jobStr); 
@@ -129,10 +164,14 @@ class Worker {
             socket_err("socket_connect()"); 
     }
 
+    public function getID() {
+        return $this->$ID; 
+    }
+
     public function overHead() {
-        $overHeadSql = "SELECT overhead FROM loadTable where address = " . \
-            $address . ";"; 
-        $this->$row = oneRowFetch($this->$overHeadSql, $this->$dbConn);
+        $overHeadSql = "SELECT overhead FROM worker where address = " . \
+            $this->$address . ";"; 
+        $this->$row = oneRowFetch($overHeadSql, $this->$dbConn);
         $this->$NUM_OF_PROCESSING_JOBS = $row[1];
         $this->$MAX_NUM_OF_JOBS = $row[2];
         $this->$STATE = $row[3];
@@ -144,11 +183,28 @@ class Worker {
     }
 
     public function doJob($job) {
-        command($job->jobStr());  
+        return command($job->jobStr());          
     }
 
     public function state() { 
         return $this->$STATE; 
+    }
+
+    public function getMaxNumOfJobs() {
+        return $this->$MAX_NUM_OF_JOBS; 
+    }
+
+    public function setMaxNumOfJobs($num) {
+        $this->$MAX_NUM_OF_JOBS = $num;
+        $job = new Job("mod", strval($num), 0);
+        return command($job->jobStr());
+    }
+
+    public function getProcessingJobs() {
+        $sqlStmt = "SELECT processing FROM worker where address = " . \
+           $this->$address; 
+        $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbConn);
+        return $this->$NUM_OF_PROCESSING_JOBS;
     }
 } 
 
