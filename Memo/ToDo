@@ -1,0 +1,9 @@
+Dispatcher Memo
+
+- Customer-side
+    1.Connection retry if connect action is failed when init. 
+    2.Management of workers via WorkerHouse:
+        1.Queue state and should able to modify queue configurations.
+        2.If multi master exists in some time the management may met
+          conflict situation, should assign role to masters to prevent
+          this situation. 
