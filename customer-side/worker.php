@@ -8,7 +8,7 @@ class Job {
     private $order;
     private $content;
     private $priority;
-
+    
     function __construct($order_, $content_, $pri_) {
         $this->$order = $order_; 
         $this->$content = $content_;
@@ -46,11 +46,12 @@ class Job {
     }
 }
 
-class WorkerHouse { 
+class WorkerHouse extends Thread { 
     // 0: Weigthed Round Robin
     // 1: Dispatch by overhead of workers
     private $disMethod;
     private $workers = new splDoublyLinkedList();
+    private $wareHouse = new splDoublyLinkedList();
     private $dispatchMethodArrary = array(
         0 => 'rRobinDispatch',
         1 => 'overHeadDispatch' 
@@ -163,9 +164,9 @@ class Worker {
     private $ID;
     private $MAX_NUM_OF_JOBS;
     private $NUM_OF_PROCESSING_JOBS;
-
+    
     // 0: Unknow
-    // 1: Free
+    // 1: Fre
     // 2: Normal
     // 3: Congested
     // 4: Emergency
