@@ -20,7 +20,11 @@ define("ORDER_MOD", 1);
 define("DISPATCH_ROUNDROBIN");
 define("DISPATCH_OVERHEAD");
 
-$workerList = array[
-    array["10.5.2.22", 8012]
-];
+// Protocol Bytes
+define("DONE_BYTE", 0x0102);
+define("READ_TO_RECV_BYTE", 0x0304);
+
+$workerList = array(
+    array("10.5.2.22", 8012)
+);
 

@@ -40,3 +40,19 @@ function sortIntoIndex($array) {
     return $sorted;
 }
 
+function SocketConnect_TCP($address, $port) {
+    $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+    if (!$socket) {
+        generic_err("Unable to create AF_INET socket.");
+        socket_close($socket);
+        return null;
+    }
+    $ret = socket_connect($socket, $address, $port);
+    if ($ret == false) {
+        generic_err("Unable to connect to " . $address . "."); 
+        return null;
+    }
+
+    return $socket;
+}
+
