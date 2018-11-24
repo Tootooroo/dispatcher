@@ -121,21 +121,36 @@ class WorkerHouse extends Thread {
         return 0;
     }
 
+    public function run() {
+        $count = 0;
+        $iter = $this->$workers;
+
+        // Iterating over all the workers in the house
+        // and check job ready state of each of it. 
+        do {
+            if ($iter->current()->isJobDone()) {
+                $iter->current()->start();  
+            }
+            if (($count++ % 20) == 0)
+                sleep(1);
+        } while($iter->next())
+    }
+
     public function houseEnter($worker) {
         if ($worker) {
-            $this->$workers->add(0, $worker);  
+            $this->$workers.add(0, $worker);  
         }
     }  
 
     public function houseExit($address) {
         $begin = $this->$workers->current();
         $iter = $this->$workers;
-        while ($iter.current().addr() != $address) {
-            $iter.next(); 
-            if ($iter.current == $begin)
+        while ($iter->current().addr() != $address) {
+            $iter->next(); 
+            if ($iter->current == $begin)
                 return -1;
         }            
-        $iter.offsetUnset($iter.key());
+        $iter.offsetUnset($iter->key());
         return 0;
     } 
 
@@ -151,12 +166,13 @@ class WorkerHouse extends Thread {
 
         return -1;
     } 
+
     public function workerInfo($wID) {
     
     }
 }
 
-class Worker {
+class Worker extends Thread {
     /* Connection */
     private $address;
     private $port;
@@ -180,10 +196,6 @@ class Worker {
         $this->$port = $port_;
     }
 
-    private function command($jobStr) { 
-       socket_write($this->$socket, $jobStr); 
-    }
-
     public function connect() {
         $ret = 0;
         if ($ret = $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) === false) {
@@ -197,12 +209,27 @@ class Worker {
         return $ret;
     }
 
+    public function isJobDone() {
+        $buf = ' ';
+        $ret = socket_recv($this->$socket, $buf, 2, MSG_DONTWAIT); 
+        if ($ret <= 0)
+            return false;
+        return (int)$buf == DONE_BYTES;
+    }
+
+    public function jobReceive() { // Implement it after protocols has been designed. }
+
     public function getID() {
         return $this->$ID; 
     }
 
     public function overHead() {
+<<<<<<< HEAD
         $overHeadSql = "SELECT overhead FROM worker where address = " . $this->$address . ";"; 
+=======
+        $overHeadSql = "SELECT overhead FROM worker where address = " .
+            $this->$address . ";"; 
+>>>>>>> 0c0680ed70d2af4f6d70094f295ab81631363249
     
         if ($this->$STATE == WORKER_UNKNOWN_STATE) {
             return -1; 
@@ -214,13 +241,16 @@ class Worker {
         $this->$STATE = $row[3];
 
         // Overhead calculate
+<<<<<<< HEAD
         $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) * $this->$MAX_NUM_OF_JOBS; 
+=======
+        $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) 
+            * $this->$MAX_NUM_OF_JOBS; 
+>>>>>>> 0c0680ed70d2af4f6d70094f295ab81631363249
         return $overHead;
     }
 
-    public function doJob($job) {
-        return command($job->jobStr());          
-    }
+    public function doJob($job) {}
 
     public function state() { 
         return $this->$STATE; 
@@ -238,11 +268,16 @@ class Worker {
     public function setMaxNumOfJobs($num) {
         $this->$MAX_NUM_OF_JOBS = $num;
         $job = new Job("mod", strval($num), 0);
-        return command($job->jobStr());
+        // fixme: should send command via protocols 
     }
 
     public function getProcessingJobs() {
+<<<<<<< HEAD
         $sqlStmt = "SELECT processing FROM worker where address = " . $this->$address; 
+=======
+        $sqlStmt = "SELECT processing FROM worker where address = " . 
+           $this->$address; 
+>>>>>>> 0c0680ed70d2af4f6d70094f295ab81631363249
         $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbConn);
         return $this->$NUM_OF_PROCESSING_JOBS;
     }
