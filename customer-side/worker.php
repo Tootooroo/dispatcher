@@ -133,7 +133,7 @@ class WorkerHouse extends Thread {
             }
             if (($count++ % 20) == 0)
                 sleep(1);
-        } while($iter->next())
+        } while($iter->next());
     }
 
     public function houseEnter($worker) {
@@ -217,19 +217,15 @@ class Worker extends Thread {
         return (int)$buf == DONE_BYTES;
     }
 
-    public function jobReceive() { // Implement it after protocols has been designed. }
+    public function jobReceive() { /* Implement it after protocols has been designed. */ }
 
     public function getID() {
         return $this->$ID; 
     }
 
     public function overHead() {
-<<<<<<< HEAD
-        $overHeadSql = "SELECT overhead FROM worker where address = " . $this->$address . ";"; 
-=======
         $overHeadSql = "SELECT overhead FROM worker where address = " .
             $this->$address . ";"; 
->>>>>>> 0c0680ed70d2af4f6d70094f295ab81631363249
     
         if ($this->$STATE == WORKER_UNKNOWN_STATE) {
             return -1; 
@@ -241,12 +237,8 @@ class Worker extends Thread {
         $this->$STATE = $row[3];
 
         // Overhead calculate
-<<<<<<< HEAD
-        $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) * $this->$MAX_NUM_OF_JOBS; 
-=======
         $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) 
             * $this->$MAX_NUM_OF_JOBS; 
->>>>>>> 0c0680ed70d2af4f6d70094f295ab81631363249
         return $overHead;
     }
 
@@ -272,12 +264,8 @@ class Worker extends Thread {
     }
 
     public function getProcessingJobs() {
-<<<<<<< HEAD
-        $sqlStmt = "SELECT processing FROM worker where address = " . $this->$address; 
-=======
         $sqlStmt = "SELECT processing FROM worker where address = " . 
            $this->$address; 
->>>>>>> 0c0680ed70d2af4f6d70094f295ab81631363249
         $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbConn);
         return $this->$NUM_OF_PROCESSING_JOBS;
     }
