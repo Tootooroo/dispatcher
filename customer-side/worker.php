@@ -2,7 +2,7 @@
 
 <?php
 
-include "config.php"
+include "config.php";
 
 class Job {
     private $order;
@@ -50,8 +50,8 @@ class WorkerHouse extends Thread {
     // 0: Weigthed Round Robin
     // 1: Dispatch by overhead of workers
     private $disMethod;
-    private $workers = new splDoublyLinkedList();
-    private $wareHouse = new splDoublyLinkedList();
+    private $workers;
+    private $wareHouse;
     private $dispatchMethodArrary = array(
         0 => 'rRobinDispatch',
         1 => 'overHeadDispatch' 
@@ -59,6 +59,9 @@ class WorkerHouse extends Thread {
     
     function __construct($disMethod_, $workerSet) {
         $this->$disMethod = $disMethod_; 
+        
+        $workers = new splDoublyLinkedList();
+        $wareHouse = new splDoublyLinkedList();
 
         foreach ($workerSet as $worker) {
             $worker = new Worker($worker[HostIdx], $worker[PortIdx]);
@@ -199,8 +202,7 @@ class Worker {
     }
 
     public function overHead() {
-        $overHeadSql = "SELECT overhead FROM worker where address = " . \
-            $this->$address . ";"; 
+        $overHeadSql = "SELECT overhead FROM worker where address = " . $this->$address . ";"; 
     
         if ($this->$STATE == WORKER_UNKNOWN_STATE) {
             return -1; 
@@ -212,8 +214,7 @@ class Worker {
         $this->$STATE = $row[3];
 
         // Overhead calculate
-        $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) \
-            * $this->$MAX_NUM_OF_JOBS; 
+        $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) * $this->$MAX_NUM_OF_JOBS; 
         return $overHead;
     }
 
@@ -241,8 +242,7 @@ class Worker {
     }
 
     public function getProcessingJobs() {
-        $sqlStmt = "SELECT processing FROM worker where address = " . \
-           $this->$address; 
+        $sqlStmt = "SELECT processing FROM worker where address = " . $this->$address; 
         $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbConn);
         return $this->$NUM_OF_PROCESSING_JOBS;
     }

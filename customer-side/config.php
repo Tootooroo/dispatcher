@@ -20,7 +20,9 @@ define("ORDER_MOD", 1);
 define("DISPATCH_ROUNDROBIN");
 define("DISPATCH_OVERHEAD");
 
-$workerList = array[
-    array["10.5.2.22", 8012]
-];
+$workerList = array(
+    array("10.5.2.22", 8012)
+);
+
+
 
