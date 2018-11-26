@@ -2,8 +2,8 @@
 
 <?php
 
-include "definitions.php"
-include "../util.php"
+include "definitions.php";
+include "../util.php";
 
 // Use to seperate request-reply pair
 $SEQID = 0;
@@ -24,15 +24,13 @@ class Item {
     private $flags;
     private $length; 
 
-    function __construct($type, $op, $property, $flags, $content_) {
-        $this->setOp($);  
-        $this->setCate($cate_);
-        $this->setPri($priority);
-        $this->setContent(($content_);
-         
-        if ($this->$type == BRIDGE_TYPE_REQUEST) {
-            $this->$length = strlen($type_) + 2 + 4 + strlen($content_);
-        }
+    function __construct($type_, $op_, $property_, $flags_, $content_) {
+        $this->$type =  $type_; 
+        $this->$op = $op_;
+        $this->$property = $property_;
+        $this->$flags = $flags_;
+        $this->$content = $content_;
+        $this->$length = BRIDGE_FRAME_HEADER_LEN;
 
         return 0;
     }
@@ -131,7 +129,6 @@ class BridgeEntry {
         
         Bridge_send($this->$socket, $message, $strlen(message), NULL);
         $ret = socket_recv($socket, $message, $len, NULL);
-        if ($ret == FALSE)
     } 
 
     private function recv_($len, $flags) {

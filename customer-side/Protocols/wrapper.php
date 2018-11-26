@@ -25,13 +25,20 @@ function Bridge_recv_header($socket, &$buffer, $flags) {
         if ($nBytes < $lenShouldRecv) {
             $lenShouldRecv = $lenShouldRecv - $nBytes;       
         }
-        $buffer = $buffer . $recvBuffer; 
-       
+        $buffer = $buffer . $recvBuffer;  
     }
     return $nBytes; 
 }
 
+function Bridge_header_validate($buffer) {
+    
+}
+
 function Bridge_recv($socket, &$buffer, &$len, $flags) {
-      
+    $nBytes = Bridge_recv_header($socket, $buffer, $flags);             
+    if (Bridge_header_validate($buffer) == FALSE) {
+        return FALSE; 
+    }
+    
 }
 
