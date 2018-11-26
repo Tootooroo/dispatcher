@@ -5,66 +5,81 @@
 include "definitions.php"
 include "../util.php"
 
-define("ENTRY_UP", 1);
-define("ENTRY_DOWN", 0);
-define("BIN_FORMAT", "vvvA*"); 
+// Use to seperate request-reply pair
+$SEQID = 0;
+
+function seqIDAlloc() {
+    $allocID = $SEQID;
+    if ($SEQID < 255)
+        $SEQID = $SEQID + 1;
+    else
+        $SEQID = 0;
+    return $allocID;
+}
 
 class Item {
+    private $type;
     private $op;
-    private $cate;
-    private $priority;
     private $content;
-    
-    function __construct($op_, $cate_, $priority_, $content_) {
-        $this->setOp($op_);  
+    private $flags;
+    private $length; 
+
+    function __construct($type, $op, $property, $flags, $content_) {
+        $this->setOp($);  
         $this->setCate($cate_);
         $this->setPri($priority);
         $this->setContent(($content_);
+         
+        if ($this->$type == BRIDGE_TYPE_REQUEST) {
+            $this->$length = strlen($type_) + 2 + 4 + strlen($content_);
+        }
+
         return 0;
     }
 
-    public function getOp() {
+    public function flags() {
+        return $this->$flags; 
+    }
+
+    public function setFlags($flags_) {
+        // You may need to check whether is
+        // flags value is valid.
+        $this->$flags = $flags_; 
+        return 0;
+    }
+
+    public function type() {
+        return $this->$type; 
+    }
+
+    public function setType_($type_) {
+        $check = $type_ != BRIDGE_TYPE_REQUEST &&
+                 $type_ != BRIDGE_TYPE_INFO  &&
+                 $type_ != BRIDGE_TYPE_MANAGEMENT;     
+        if ($check) 
+            return 1; 
+
+        $this->$type = $type_; 
+        return 0;
+    }     
+
+    public function op() {
         return $this->$op; 
     }
 
     public function setOp($op_) {
-        $check = op_ != BRIDGE_OP_DISPATCH &&
-                 op_ != BRIDGE_OP_DELIVER  &&
-                 op_ != BRIDGE_OP_CONTROL;     
-        if ($check) 
-            return 1; 
-
-        $this->$op = $op_; 
-        return 0;
-    }     
-
-    public function getCate() {
-        return $this->$cate; 
-    }
-
-    public function setCate($cate_) {
-        $check = $cate_ != BRIDGE_CATE_DEFAULT &&
-                 $cate_ != BRIDGE_CATE_PROPERTY; 
+        $check = $op_ != BRIDGE_OP_ENABLE &&
+                 $op_ != BRIDGE_OP_DISABLE &&
+                 $op_ != BRIDGE_OP_SET; 
         if ($check) 
             return 1;
 
-        $this->$cate = $cate_;
+        $this->$op = $op_;
         return 0;
     }
     
-    public function getPri() {
-        return $this->$priority; 
-    }
-
-    public function setPri($pri) {
-        if ($pri < 0 || pri > 100)
-            return 1;
-        $this->$priority = $pri;
-        return 0;
-    }
-
-    public function getContent() {
-        return $this->$cate; 
+    public function content() {
+        return $this->$content; 
     }
 
     public function setContent($content_) {
@@ -73,9 +88,9 @@ class Item {
     }
 
     public function message() {
-        if ($this->$op == BRIDGE_OP_DISPATCH) { } else if ($this->$op == BRIDGE_OP_) 
-        $message = pack(BIN_FORMAT, $this->$op, $this->$cate,
-            $this->$priority, $this->$content); 
+        $message = pack(BRIDGE_FRAME_FORMAT, $this->$type,
+            $this->$op, $this->$property, seqIDAlloc(), 
+            $this->$flags, BRIDGE_FRAME_FORMAT);
         return $message; 
     }
 }
@@ -108,9 +123,15 @@ class BridgeEntry {
     }
 
     public function dispatch($content_) {
+        $len = 0;
+        $lenShouldSent = 0;
+
         $item = new Item(BRIDGE_OP_DISPATCH, BRIDGE_CATE_DEFAULT, 0, $content_);   
         $message = $item->message();
-        $ret = socket_send($socket, $message, strlen($message), NULL);
+        
+        Bridge_send($this->$socket, $message, $strlen(message), NULL);
+        $ret = socket_recv($socket, $message, $len, NULL);
+        if ($ret == FALSE)
     } 
 
     private function recv_($len, $flags) {
