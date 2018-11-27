@@ -15,6 +15,10 @@ function Bridge_send($socket, $message, $lenShouldSent, $flags) {
     return $nBytes;
 }
 
+function Bridge_recv_($socket, &$buffer, &$len, $flags) {
+
+}
+
 function Bridge_recv_header($socket, &$buffer, $flags) {
     $lenShouldRecv = BRIDGE_FRAME_FORMAT;
     while ($lenShouldRecv > 0) {
@@ -32,6 +36,6 @@ function Bridge_recv_header($socket, &$buffer, $flags) {
 }
 
 function Bridge_recv($socket, &$buffer, &$len, $flags) {
-      
+           
 }
 
