@@ -17,8 +17,8 @@ define("ORDER_DO", 0);
 define("ORDER_MOD", 1);
 
 // Dispatch Method
-define("DISPATCH_ROUNDROBIN");
-define("DISPATCH_OVERHEAD");
+define("DISPATCH_ROUNDROBIN", 1);
+define("DISPATCH_OVERHEAD", 2);
 
 // Protocol Bytes
 define("DONE_BYTE", 0x0102);

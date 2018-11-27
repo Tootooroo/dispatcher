@@ -50,8 +50,8 @@ class WorkerHouse extends Thread {
     // 0: Weigthed Round Robin
     // 1: Dispatch by overhead of workers
     private $disMethod;
-    private $workers = new splDoublyLinkedList();
-    private $wareHouse = new splDoublyLinkedList();
+    private $workers;
+    private $wareHouse;
     private $dispatchMethodArrary = array(
         0 => 'rRobinDispatch',
         1 => 'overHeadDispatch' 
@@ -59,6 +59,9 @@ class WorkerHouse extends Thread {
     
     function __construct($disMethod_, $workerSet) {
         $this->$disMethod = $disMethod_; 
+        
+        $workers = new splDoublyLinkedList();
+        $wareHouse = new splDoublyLinkedList();
 
         foreach ($workerSet as $worker) {
             $worker = new Worker($worker[HostIdx], $worker[PortIdx]);
@@ -130,7 +133,7 @@ class WorkerHouse extends Thread {
             }
             if (($count++ % 20) == 0)
                 sleep(1);
-        } while($iter->next())
+        } while($iter->next());
     }
 
     public function houseEnter($worker) {
@@ -214,7 +217,7 @@ class Worker extends Thread {
         return (int)$buf == DONE_BYTES;
     }
 
-    public function jobReceive() { // Implement it after protocols has been designed. }
+    public function jobReceive() { /* Implement it after protocols has been designed. */ }
 
     public function getID() {
         return $this->$ID; 
