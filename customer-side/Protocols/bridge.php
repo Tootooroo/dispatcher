@@ -2,35 +2,27 @@
 
 <?php
 
+include "wrapper.php";
 include "definitions.php";
 include "../util.php";
-
-// Use to seperate request-reply pair
-$SEQID = 0;
-
-function seqIDAlloc() {
-    $allocID = $SEQID;
-    if ($SEQID < 255)
-        $SEQID = $SEQID + 1;
-    else
-        $SEQID = 0;
-    return $allocID;
-}
 
 class Item {
     private $type;
     private $op;
-    private $content;
+    private $property;
+    private $seqID;
     private $flags;
     private $length; 
+    private $content;
 
-    function __construct($type_, $op_, $property_, $flags_, $content_) {
+    function __construct($type_, $op_, $property_, $seqID_, $flags_, $content_) {
         $this->$type =  $type_; 
         $this->$op = $op_;
         $this->$property = $property_;
         $this->$flags = $flags_;
+        $this->$length = BRIDGE_FRAME_HEADER_LEN + strlen($content_);
+        $this->$seqID = $seqID_;
         $this->$content = $content_;
-        $this->$length = BRIDGE_FRAME_HEADER_LEN;
 
         return 0;
     }
@@ -43,6 +35,15 @@ class Item {
         // You may need to check whether is
         // flags value is valid.
         $this->$flags = $flags_; 
+        return 0;
+    }
+
+    public function seqID() {
+        return $this->$seqID; 
+    }
+
+    public function setSeqID($seqID_) {
+        $this->$seqID = $seqID_; 
         return 0;
     }
 
@@ -87,9 +88,13 @@ class Item {
 
     public function message() {
         $message = pack(BRIDGE_FRAME_FORMAT, $this->$type,
-            $this->$op, $this->$property, seqIDAlloc(), 
+            $this->$op, $this->$property, $this->$seqID, 
             $this->$flags, BRIDGE_FRAME_FORMAT);
         return $message; 
+    }
+
+    public function length() {
+        return $this->$length; 
     }
 }
 
@@ -98,14 +103,12 @@ class BridgeEntry {
     private $socket;  
     private $address;
     private $port;
-    private $buffer;
-    private $bufferSize;
 
     function __construct($address_, $port_, $bufferSize) {
         $this->$address = $address_;
         $this->$port = $port_; 
         $this->$bufferSize = $bufferSize;
-        
+
         $this->$socket = SocketConnect_TCP($address_, $port_);
         $this->$state = $this->$socket == null ? ENTRY_DOWN : ENTRY_UP;
         return 0;
@@ -120,45 +123,38 @@ class BridgeEntry {
         return $ret;
     }
 
-    public function dispatch($content_) {
+    public function dispatch($taskID, $content_) {
+        $buffer = null;
         $len = 0;
         $lenShouldSent = 0;
-
-        $item = new Item(BRIDGE_OP_DISPATCH, BRIDGE_CATE_DEFAULT, 0, $content_);   
-        $message = $item->message();
         
-        Bridge_send($this->$socket, $message, $strlen(message), NULL);
-        $ret = socket_recv($socket, $message, $len, NULL);
+        // Frame generation.
+        $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, NULL, $content_);   
+        $message = $item->message();
+
+        Bridge_send($this->$socket, $message, $item->length(), NULL);
+        Bridge_recv($this->$socket, $buffer, NULL);  
+        if (!BridgeIsReply($buffer)) 
+            return FALSE;
+
+        return BridgeIsAccpetSet($buffer);
     } 
+    
+    // Prototype of receiver is **********
+    private function retrive($taskID, $receiver, $args) {
+        $buffer = NULL;
 
-    private function recv_($len, $flags) {
-        if ($this->$state == ENTRY_DOWN) {
-            generic_err("This Entry is not ready to receive data."); 
-        }
-        $nBytes = socket_recv($socket, $this->$buffer, $this->$bufferSize, $flags); 
-        return $nBytes;
+        $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, 
+            BRIDGE_FLAG_RETRIVE, BRIDGE_FRAME_HEADER_LEN); 
+
+        Bridge_send($this->$socket, $item->message(), $item->length(), NULL);
+        Bridge_recv($this->$socket, $buffer, NULL);
+        if (!BridgeIsReply($buffer) || !BridgeIsReadyToSendSet($buffer))
+           return FALSE; 
+        $ret = Bridge_retrive($this->$socket, $receiver, $args); 
+        return $ret;
     }
 
-    // Data receiving
-    public function recv() {
-        $flags = 0;                              
-        return $this->recv_($this->$bufferSize, $flags);
-    }
-
-    // Data receiving without blocked
-    public function tryRecv() {
-        $flags = MSG_DONTWAIT; 
-        return $this->recv_($this->$bufferSize, $flags);
-    }
-
-    public function isReady() {
-        $flags = MSG_DONTWAIT | MSG_PEEK; 
-        return $this->recv_(1, $flags);
-    }
-
-    public function data() {
-        return $this->$buffer; 
-    }
 }
 
 function bridgeEntry_Wait(array &$read) {
@@ -175,4 +171,6 @@ function bridgeEntry_Wait(array &$read) {
     }
     return $nReady;
 }
+
+
 
