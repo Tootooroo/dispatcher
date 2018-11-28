@@ -35,7 +35,9 @@ function Bridge_send($socket, $message, $lenShouldSent, $flags) {
 }
 
 function Bridge_recv_header($bridgeEntry, &$buffer, $flags) {
-    return socket_recv_wrapper($socket, $buffer, BRIDGE_FRAME_HEADER_LEN, $flags);
+    $buffer_ = $buffer;
+    $len = BRIDGE_FRAME_HEADER_LEN;
+    return socket_recv_wrapper($socket, $buffer_, $len, $flags);
 }
 
 function Bridge_header_validate($buffer) {
@@ -61,9 +63,9 @@ function Bridge_recv($socket, &$buffer, $flags) {
 
 function Bridge_retrive($socket, $receiver, &$args) {
     $buffer = null;
-
+    $len = BRIDGE_MAX_SIZE_OF_BUFFER;
     while (TRUE) {
-        socket_recv_wrapper($socket, $buffer, BRIDGE_MAX_SIZE_OF_BUFFER); 
+        socket_recv_wrapper($socket, $buffer, $len, NULL); 
 
         if (BridgeIsTransfer($buffer)) {
             receiver($args, $content); 
