@@ -28,7 +28,6 @@ function socket_recv_wrapper($socket, &$buffer, &$lenShouldRecv, $flags) {
         $buffer = $buffer . $recvBuffer;  
     }
     return $nBytes; 
-
 }
 
 function Bridge_send($socket, $message, $lenShouldSent, $flags) {
@@ -169,5 +168,8 @@ function BridgeIsDeclineSet($frame) {
 }
 function BridgeIsReadyToSendSet($frame) {
     return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_READY_TO_SEND);
+}
+function BridgeIsJobDoneSet($frame) {
+    return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_IS_DONE);
 }
 

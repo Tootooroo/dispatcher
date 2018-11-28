@@ -7,8 +7,8 @@ define("BRIDGE_MAX_SIZE_OF_BUFFER", 1024);
 // Binary buffer format
 define("BRIDGE_FRAME_FORMAT_PACK", "vvvvvIA*");
 define("BRIDGE_FRAME_FORMAT_UNPACK", "vvvvIA*");
-// TYPE(2) + OP(2) + PROP(2) + SEQID(2) + FLAG(2) + LEN(4) = 14 Bytes
-define("BRIDGE_FRAME_HEADER_LEN", 14);
+// TYPE(2) + OP(2) + PROP(2) + SEQID(2) + FLAG(4) + LEN(4) = 14 Bytes
+define("BRIDGE_FRAME_HEADER_LEN", 16);
 // Entry state
 define("ENTRY_UP", 0x01);
 define("ENTRY_DOWN", 0x00);
@@ -26,16 +26,16 @@ define("BRIDGE_OP_DISABLE", 0x02);
 define("BRIDGE_OP_SET", 0x03);
 
 // Bridge Flag Field Constant
-define("BRIDGE_FLAG_NOTIFY", 0x01);
-define("BRIDGE_FLAG_TRANSFER", 0x02);
-define("BRIDGE_FLAG_TRANSFER_DONE", 0x04);
-define("BRIDGE_FLAG_ACCEPT", 0x08);
-define("BRIDGE_FLAG_DECLINE", 0x10);
-define("BRIDGE_FLAG_RETRIVE", 0x20);
-define("BRIDGE_FLAG_READY_TO_SEND", 0x40);
-define("BRIDGE_FLAG_ERROR", 0x80);
+define("BRIDGE_FLAG_NOTIFY", 0x0001);
+define("BRIDGE_FLAG_TRANSFER", 0x0002);
+define("BRIDGE_FLAG_TRANSFER_DONE", 0x0004);
+define("BRIDGE_FLAG_ACCEPT", 0x0008);
+define("BRIDGE_FLAG_DECLINE", 0x0010);
+define("BRIDGE_FLAG_RETRIVE", 0x0020);
+define("BRIDGE_FLAG_READY_TO_SEND", 0x0040);
+define("BRIDGE_FLAG_ERROR", 0x0080);
+define("BRIDGE_FLAG_IS_JOB_DONE", 0x0100);
 
-// Bridge Property Field Constant
-// Specific Property is pending
+// Bridge Property Field Constant Specific Property is pending
 
 

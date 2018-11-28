@@ -92,7 +92,7 @@ class Item {
             $this->$flags, BRIDGE_FRAME_FORMAT);
         return $message; 
     }
-
+     
     public function length() {
         return $this->$length; 
     }
@@ -104,14 +104,17 @@ class BridgeEntry {
     private $address;
     private $port;
 
-    function __construct($address_, $port_, $bufferSize) {
+    function __construct($address_, $port_) {
         $this->$address = $address_;
         $this->$port = $port_; 
-        $this->$bufferSize = $bufferSize;
 
         $this->$socket = SocketConnect_TCP($address_, $port_);
         $this->$state = $this->$socket == null ? ENTRY_DOWN : ENTRY_UP;
         return 0;
+    }
+
+    public function connect() {
+        return $this->reconnect(); 
     }
 
     public function reconnect() {
@@ -147,6 +150,9 @@ class BridgeEntry {
         $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, 
             BRIDGE_FLAG_RETRIVE, BRIDGE_FRAME_HEADER_LEN); 
 
+        // fixme: Three handshake may be better for stablility
+        //        but Transfer layer provide transfer buffer for us, so it's
+        //        not a problem.
         Bridge_send($this->$socket, $item->message(), $item->length(), NULL);
         Bridge_recv($this->$socket, $buffer, NULL);
         if (!BridgeIsReply($buffer) || !BridgeIsReadyToSendSet($buffer))
@@ -155,6 +161,18 @@ class BridgeEntry {
         return $ret;
     }
 
+    private function isJobDone($taskID) {
+        $buffer = NULL;
+        $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID,
+            BRIDGE_FLAG_IS_DONE, BRIDGE_FRAME_HEADER_LEN); 
+        Bridge_send($this->$socket, $item->message(), $item->length(), NULL);
+        Bridge_recv($this->$socket, $buffer, NULL);
+        if (!BridgeIsReply($buffer))
+            return FALSE;
+        if (BridgeIsJobDoneSet($buffer))
+            return TRUE;
+        return FALSE;
+    }
 }
 
 function bridgeEntry_Wait(array &$read) {

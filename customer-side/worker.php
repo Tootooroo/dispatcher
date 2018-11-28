@@ -3,50 +3,39 @@
 <?php
 
 include "config.php";
+include "Protocols/definitions.php";
+include "Protocols/wrapper.php";
+include "Protocols/bridge.php";
 
 class Job {
-    private $order;
-    private $content;
-    private $priority;
+    private $jobID;
+    private $jobContent; 
     
-    function __construct($order_, $content_, $pri_) {
-        $this->$order = $order_; 
-        $this->$content = $content_;
-        $this->$priority = $pri_; 
+    function __construct($jobID_, $jobContent_) {
+        $this->$jobID = $jobID_;
+        $this->$jobContent = $jobContent_;
     }
 
-    public function getOrd() {
-        return $this->$order; 
+    function ID() {
+        return $this->$jobID; 
     }
 
-    public function setOrd($type_) { 
-        $this->$order = $type_;     
+    function setID($jobID_) {
+        $this->$jobID = $jobID_; 
+        return TRUE;
     }
 
-    public function getContent() {
-        return $this->$content; 
+    function content() {
+        return $this->$jobContent; 
     }
 
-    public function getPri() {
-        return $this->$priority; 
-    }    
-
-    public function setPri($pri) {
-        $this->$priority = $pri; 
-        return 0;
-    }
-
-    public function setContent($content_) { 
-        $this->$content = $content_; 
-    }
-
-    public function jobStr() { 
-        $jobStr = $pack("vvH*", $this->$order, $this->$priority, $this->$content_); 
-        return $jobStr;
+    function setContent($jobContent_) {
+        $this->$jobContent = $jobContent_;
+        return TRUE; 
     }
 }
 
-class WorkerHouse extends Thread { 
+class WorkerHouse { 
     // 0: Weigthed Round Robin
     // 1: Dispatch by overhead of workers
     private $disMethod;
@@ -79,7 +68,7 @@ class WorkerHouse extends Thread {
         static $currentIdx = 0;
         $workersRef = $this->$workers;
         $numOfWorkers = $workersRef->count();
-        
+
         $theWorker = $workerRef->offsetGet($currentIdx++);   
         if ($currentIdx > $numOfWorkers)
             $currentIdx = 0;
@@ -121,21 +110,6 @@ class WorkerHouse extends Thread {
         return 0;
     }
 
-    public function run() {
-        $count = 0;
-        $iter = $this->$workers;
-
-        // Iterating over all the workers in the house
-        // and check job ready state of each of it. 
-        do {
-            if ($iter->current()->isJobDone()) {
-                $iter->current()->start();  
-            }
-            if (($count++ % 20) == 0)
-                sleep(1);
-        } while($iter->next());
-    }
-
     public function houseEnter($worker) {
         if ($worker) {
             $this->$workers.add(0, $worker);  
@@ -163,7 +137,6 @@ class WorkerHouse extends Thread {
             $this->$disMethod = $method; 
             return 0;
         }
-
         return -1;
     } 
 
@@ -174,10 +147,7 @@ class WorkerHouse extends Thread {
 
 class Worker extends Thread {
     /* Connection */
-    private $address;
-    private $port;
-    private $socket;
-    private $dbConn;  
+    private $bridgeEnry;     
 
     /* Management Purpose Infos */
     private $ID;
@@ -185,39 +155,28 @@ class Worker extends Thread {
     private $NUM_OF_PROCESSING_JOBS;
     
     // 0: Unknow
-    // 1: Fre
+    // 1: Free
     // 2: Normal
     // 3: Congested
     // 4: Emergency
     private $STATE;
 
     function __construct($address_, $port_) {
-        $this->$address = $address_;
-        $this->$port = $port_;
+        $bridgeEntry = new BridgeEntry($address_, $port_);
+        $ret = $bridgeEntry->connect();
+        $ret == ENTRY_DOWN ? 
+            $this->$STATE = WORKER_UNKNOWN_STATE :
+            $this->$STATE = WORKER_NORMAL_STATE;
+        return 0; 
     }
 
-    public function connect() {
-        $ret = 0;
-        if ($ret = $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) === false) {
-            socket_err("socket_create()");
-            return $ret;
-        }
-        if ($ret = socket_connect($this->$socket, $this->$address, $this->$port) === false) {
-            socket_err("socket_connect()"); 
-            return $ret;
-        }
-        return $ret;
+    public function isJobDone($taskID) {
+        return $bridgeEntry->isJobDone($taskID);  
     }
 
-    public function isJobDone() {
-        $buf = ' ';
-        $ret = socket_recv($this->$socket, $buf, 2, MSG_DONTWAIT); 
-        if ($ret <= 0)
-            return false;
-        return (int)$buf == DONE_BYTES;
+    public function jobReceive() { 
+        /* Implement it after protocols has been designed. */ 
     }
-
-    public function jobReceive() { /* Implement it after protocols has been designed. */ }
 
     public function getID() {
         return $this->$ID; 
