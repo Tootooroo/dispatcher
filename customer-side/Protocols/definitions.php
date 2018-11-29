@@ -7,8 +7,8 @@ define("BRIDGE_MAX_SIZE_OF_BUFFER", 1024);
 // Binary buffer format
 define("BRIDGE_FRAME_FORMAT_PACK", "vvvvvIA*");
 define("BRIDGE_FRAME_FORMAT_UNPACK", "vvvvIA*");
-// TYPE(2) + OP(2) + PROP(2) + SEQID(2) + FLAG(4) + LEN(4) = 14 Bytes
-define("BRIDGE_FRAME_HEADER_LEN", 16);
+// TYPE(2) + OP(2) + PROP(2) + SEQID(2) + FLAG(2) + LEN(4) = 14 Bytes
+define("BRIDGE_FRAME_HEADER_LEN", 14);
 // Entry state
 define("ENTRY_UP", 0x01);
 define("ENTRY_DOWN", 0x00);
@@ -35,6 +35,7 @@ define("BRIDGE_FLAG_RETRIVE", 0x0020);
 define("BRIDGE_FLAG_READY_TO_SEND", 0x0040);
 define("BRIDGE_FLAG_ERROR", 0x0080);
 define("BRIDGE_FLAG_IS_JOB_DONE", 0x0100);
+define("BRIDGE_FLAG_RECOVER", 0x0200);
 
 // Bridge Property Field Constant Specific Property is pending
 

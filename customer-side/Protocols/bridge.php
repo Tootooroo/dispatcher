@@ -113,19 +113,6 @@ class BridgeEntry {
         return 0;
     }
 
-    public function connect() {
-        return $this->reconnect(); 
-    }
-
-    public function reconnect() {
-        if ($this->$state == ENTRY_UP)
-            socket_close($this->$socket);
-        $this->$socket = SocketConnect_TCP($this->$address, $this->$port); 
-        $ret = $this->$socket == null;
-        $this->$state = $ret ? ENTRY_DOWN : ENTRY_UP;
-        return $ret;
-    }
-
     public function dispatch($taskID, $content_) {
         $buffer = null;
         $len = 0;
