@@ -2,42 +2,6 @@
 
 <?php
 
-/* Reconnect */
-function CHANNEL_REBUILD(array $args) {
- // Reconnect to worker 
-    while (true) {
-        $args['socket'] = SocketConnect_TCP($args['address'], $args['port']);
-        if ($args['socket'])
-            break;
-    } 
-    // Send Recover request
-    $recoverReq = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $args['ID'],
-        BRIDGE_FLAG_RECOVER, BRIDGE_FRAME_HEADER_LEN);
-    if (Bridge_send($args['socket'], $recoverReq->message() $item->length(), NULL) == FALSE)
-       return FALSE; 
-    if (Bridge_recv($args['socket'], $buffer, ,NULL) == FALSE)
-       return FALSE; 
-    if (!BridgeIsReply($buffer) || !BridgeIsAccpetSet($buffer))
-        return FALSE;  
-
-}
-function CHANNEL_MAINTAIN_SEND($RTN, array $args) {
-    do {
-        $ret = $RTN($args['socket'], $args['buffer'], $args['len'], $args['flags']); 
-        if ($ret == FALSE) 
-            CHANNEL_REBUILD($args); 
-    } while ($ret == FALSE);
-}
-
-function CHANNEL_MAINTAIN_RECV($RTN, array $args) {
-    do {
-        $ret = $RTN($args['socket'], $args['buffer'], $args['len'], $args['flags']); 
-        /* Try Reconnect if lost */
-        if ($ret == FALSE) 
-            CHANNEL_REBUILD($args); 
-    } while ($ret == FALSE);
-}
-
 /* Send & Recv function */
 function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {
     while ($lenShouldSent > 0) {
@@ -64,53 +28,6 @@ function socket_recv_wrapper($socket, &$buffer, &$lenShouldRecv, $flags) {
         $buffer = $buffer . $recvBuffer;  
     }
     return $nBytes; 
-}
-
-function Bridge_send($socket, $message, $lenShouldSent, $flags) {
-    return CHANNEL_MAINTAIN_SEND('socket_send_wrapper', $socket, $message, $lenShouldSent, $flags);
-}
-
-function Bridge_recv_header($bridgeEntry, &$buffer, $flags) {
-    $buffer_ = $buffer;
-    $len = BRIDGE_FRAME_HEADER_LEN;
-    return CHANNEL_MAINTAIN_RECV('socket_recv_wrapper', $socket, $buffer_, $len, $flags);
-}
-
-function Bridge_header_validate($buffer) {
-    return TRUE; 
-}
-
-function Bridge_recv($socket, &$buffer, $flags) {
-    $contentBuffer = null;
-
-    $nBytes = Bridge_recv_header($socket, $buffer, $flags);             
-    if ($nBytes == FALSE || Bridge_header_validate($buffer) == FALSE) {
-        return FALSE; 
-    }
-    $header = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $buffer); 
-    $length = $header['length'];
-    $length = $length - BRIDGE_FRAME_HEADER_LEN;
-    $nBytes = CHANNEL_MAINTAIN_RECV('socket_recv_wrapper', $socket, $contentBuffer, $length, $flags); 
-    if ($nBytes == FALSE) {
-        return FALSE; 
-    }
-    return $nBytes + BRIDGE_FRAME_HEADER_LEN; 
-}
-
-function Bridge_retrive($socket, $receiver, &$args) {
-    $buffer = null;
-    $len = BRIDGE_MAX_SIZE_OF_BUFFER;
-    while (TRUE) {
-        CHANNEL_MAINTAIN_RECV('socket_recv_wrapper', $socket, $buffer, $len, NULL); 
-
-        if (BridgeIsTransfer($buffer)) {
-            receiver($args, $content); 
-        } else {
-            if (BridgeIsTransDoneSet($buffer)) 
-                return TRUE;      
-        } 
-    }
-    return FALSE;
 }
 
 /* Field query functions */
@@ -207,7 +124,12 @@ function BridgeIsDeclineSet($frame) {
 function BridgeIsReadyToSendSet($frame) {
     return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_READY_TO_SEND);
 }
-function BridgeIsJobDoneSet($frame) {
+function BridgeIsIsJobDoneSet($frame) {
     return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_IS_DONE);
 }
-
+function BridgeIsJobDoneSet($frame) {
+    return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_JOB_DONE);
+}
+function BridgeIsRecoverSet($frame) {
+    return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_RECOVER);
+}

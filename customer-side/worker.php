@@ -148,12 +148,14 @@ class WorkerHouse {
 class Worker extends Thread {
     /* Connection */
     private $bridgeEnry;     
+    private $dbEntry;    
 
     /* Management Purpose Infos */
     private $ID;
     private $MAX_NUM_OF_JOBS;
     private $NUM_OF_PROCESSING_JOBS;
-    
+    private $isListening;
+
     // 0: Unknow
     // 1: Free
     // 2: Normal
@@ -162,8 +164,9 @@ class Worker extends Thread {
     private $STATE;
 
     function __construct($address_, $port_) {
-        $bridgeEntry = new BridgeEntry($address_, $port_);
+        $this->$bridgeEntry = new BridgeEntry($address_, $port_);
         $ret = $bridgeEntry->connect();
+        $this->$isListening = FALSE;
         $ret == ENTRY_DOWN ? 
             $this->$STATE = WORKER_UNKNOWN_STATE :
             $this->$STATE = WORKER_NORMAL_STATE;
@@ -190,7 +193,7 @@ class Worker extends Thread {
             return -1; 
         } 
 
-        $this->$row = oneRowFetch($overHeadSql, $this->$dbConn);
+        $this->$row = oneRowFetch($overHeadSql, $this->$dbEntry);
         $this->$NUM_OF_PROCESSING_JOBS = $row[1];
         $this->$MAX_NUM_OF_JOBS = $row[2];
         $this->$STATE = $row[3];
@@ -200,8 +203,24 @@ class Worker extends Thread {
             * $this->$MAX_NUM_OF_JOBS; 
         return $overHead;
     }
+    
+    // Return taskID of the job.
+    public function doJob($job) {
+        $taskID = $this->bridgeEnry->taskIDAlloc(); 
+        $content = $job->content();
+         
+        $bridgeEntry->dispatch($taskID, $content); 
+        if ($this->$isListening == FALSE) {
+           $this->start(); 
+        }
+        $this->$isListening = TRUE;
 
-    public function doJob($job) {}
+        return $taskID; 
+    }
+    
+    private function run() {
+             
+    }
 
     public function state() { 
         return $this->$STATE; 
@@ -225,7 +244,7 @@ class Worker extends Thread {
     public function getProcessingJobs() {
         $sqlStmt = "SELECT processing FROM worker where address = " . 
            $this->$address; 
-        $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbConn);
+        $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbEntry);
         return $this->$NUM_OF_PROCESSING_JOBS;
     }
 } 

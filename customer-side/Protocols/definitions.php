@@ -36,6 +36,7 @@ define("BRIDGE_FLAG_READY_TO_SEND", 0x0040);
 define("BRIDGE_FLAG_ERROR", 0x0080);
 define("BRIDGE_FLAG_IS_JOB_DONE", 0x0100);
 define("BRIDGE_FLAG_RECOVER", 0x0200);
+define("BRIDGE_FLAG_JOB_DONE", 0x0400);
 
 // Bridge Property Field Constant Specific Property is pending
 
