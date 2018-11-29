@@ -1,16 +1,165 @@
 !_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
 !_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
-!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
-!_TAG_PROGRAM_NAME	Exuberant Ctags	//
-!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
-$workers	.\customer-side\imgGen.php	/^$workers = array($/;"	v
-GetBinButton	.\customer-side\imgGen.js	/^var GetBinButton = document.querySelector(".GetBin");$/;"	v
-buildBin	.\customer-side\imgGen.js	/^function buildBin() {$/;"	f
-foreach	.\customer-side\imgGen.php	/^foreach ($workers as $address => $port) {$/;"	f
-getBin	.\customer-side\imgGen.js	/^function getBin() {$/;"	f
-isDone	.\customer-side\imgGen.js	/^var isDone = 0;$/;"	v
-release	.\customer-side\imgGen.js	/^var release = document.querySelector(".release");$/;"	v
-socket_err	.\customer-side\util.php	/^function socket_err($func) {$/;"	f
-submitButton	.\customer-side\imgGen.js	/^var submitButton = document.querySelector(".submit");$/;"	v
-targetImgUrl	.\customer-side\imgGen.js	/^var targetImgUrl;$/;"	v
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	//
+BRIDGE_FLAG_ACCEPT	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_ACCEPT", 0x0008);$/;"	d
+BRIDGE_FLAG_DECLINE	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_DECLINE", 0x0010);$/;"	d
+BRIDGE_FLAG_ERROR	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_ERROR", 0x0080);$/;"	d
+BRIDGE_FLAG_IS_JOB_DONE	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_IS_JOB_DONE", 0x0100);$/;"	d
+BRIDGE_FLAG_JOB_DONE	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_JOB_DONE", 0x0400);$/;"	d
+BRIDGE_FLAG_NOTIFY	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_NOTIFY", 0x0001);$/;"	d
+BRIDGE_FLAG_READY_TO_SEND	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_READY_TO_SEND", 0x0040);$/;"	d
+BRIDGE_FLAG_RECOVER	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_RECOVER", 0x0200);$/;"	d
+BRIDGE_FLAG_RETRIVE	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_RETRIVE", 0x0020);$/;"	d
+BRIDGE_FLAG_TRANSFER	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_TRANSFER", 0x0002);$/;"	d
+BRIDGE_FLAG_TRANSFER_DONE	customer-side/Protocols/definitions.php	/^define("BRIDGE_FLAG_TRANSFER_DONE", 0x0004);$/;"	d
+BRIDGE_FRAME_FORMAT_PACK	customer-side/Protocols/definitions.php	/^define("BRIDGE_FRAME_FORMAT_PACK", "vvvvvIA*");$/;"	d
+BRIDGE_FRAME_FORMAT_UNPACK	customer-side/Protocols/definitions.php	/^define("BRIDGE_FRAME_FORMAT_UNPACK", "vvvvIA*");$/;"	d
+BRIDGE_FRAME_HEADER_LEN	customer-side/Protocols/definitions.php	/^define("BRIDGE_FRAME_HEADER_LEN", 14);$/;"	d
+BRIDGE_MAX_SIZE_OF_BUFFER	customer-side/Protocols/definitions.php	/^define("BRIDGE_MAX_SIZE_OF_BUFFER", 1024);$/;"	d
+BRIDGE_OP_DISABLE	customer-side/Protocols/definitions.php	/^define("BRIDGE_OP_DISABLE", 0x02);$/;"	d
+BRIDGE_OP_ENABLE	customer-side/Protocols/definitions.php	/^define("BRIDGE_OP_ENABLE", 0x01);$/;"	d
+BRIDGE_OP_SET	customer-side/Protocols/definitions.php	/^define("BRIDGE_OP_SET", 0x03);$/;"	d
+BRIDGE_TYPE_INFO	customer-side/Protocols/definitions.php	/^define("BRIDGE_TYPE_INFO", 0x03);$/;"	d
+BRIDGE_TYPE_MANAGEMENT	customer-side/Protocols/definitions.php	/^define("BRIDGE_TYPE_MANAGEMENT", 0x04);$/;"	d
+BRIDGE_TYPE_REPLY	customer-side/Protocols/definitions.php	/^define("BRIDGE_TYPE_REPLY", 0x02);$/;"	d
+BRIDGE_TYPE_REQUEST	customer-side/Protocols/definitions.php	/^define("BRIDGE_TYPE_REQUEST", 0x01);$/;"	d
+BRIDGE_TYPE_TRANSFER	customer-side/Protocols/definitions.php	/^define("BRIDGE_TYPE_TRANSFER", 0x05);$/;"	d
+BridgeContentField	customer-side/Protocols/wrapper.php	/^function BridgeContentField($frame) {$/;"	f
+BridgeEntry	customer-side/Protocols/bridge.php	/^class BridgeEntry {$/;"	c
+BridgeFlagField	customer-side/Protocols/wrapper.php	/^function BridgeFlagField($frame) {$/;"	f
+BridgeFlagFieldCheck	customer-side/Protocols/wrapper.php	/^function BridgeFlagFieldCheck($frame, $bit) {$/;"	f
+BridgeIsAccpetSet	customer-side/Protocols/wrapper.php	/^function BridgeIsAccpetSet($frame) {$/;"	f
+BridgeIsDeclineSet	customer-side/Protocols/wrapper.php	/^function BridgeIsDeclineSet($frame) {$/;"	f
+BridgeIsInfo	customer-side/Protocols/wrapper.php	/^function BridgeIsInfo($frame) {$/;"	f
+BridgeIsIsJobDoneSet	customer-side/Protocols/wrapper.php	/^function BridgeIsIsJobDoneSet($frame) {$/;"	f
+BridgeIsJobDoneSet	customer-side/Protocols/wrapper.php	/^function BridgeIsJobDoneSet($frame) {$/;"	f
+BridgeIsManagement	customer-side/Protocols/wrapper.php	/^function BridgeIsManagement($frame) {$/;"	f
+BridgeIsNotifySet	customer-side/Protocols/wrapper.php	/^function BridgeIsNotifySet($frame) {$/;"	f
+BridgeIsOpDisable	customer-side/Protocols/wrapper.php	/^function BridgeIsOpDisable($frame) {$/;"	f
+BridgeIsOpEnable	customer-side/Protocols/wrapper.php	/^function BridgeIsOpEnable($frame) {$/;"	f
+BridgeIsOpSet	customer-side/Protocols/wrapper.php	/^function BridgeIsOpSet($frame) {$/;"	f
+BridgeIsReadyToSendSet	customer-side/Protocols/wrapper.php	/^function BridgeIsReadyToSendSet($frame) {$/;"	f
+BridgeIsRecoverSet	customer-side/Protocols/wrapper.php	/^function BridgeIsRecoverSet($frame) {$/;"	f
+BridgeIsReply	customer-side/Protocols/wrapper.php	/^function BridgeIsReply($frame) {$/;"	f
+BridgeIsRequest	customer-side/Protocols/wrapper.php	/^function BridgeIsRequest($frame) {$/;"	f
+BridgeIsTransDoneSet	customer-side/Protocols/wrapper.php	/^function BridgeIsTransDoneSet($frame) {$/;"	f
+BridgeIsTransfer	customer-side/Protocols/wrapper.php	/^function BridgeIsTransfer($frame) {$/;"	f
+BridgeIsTransferSet	customer-side/Protocols/wrapper.php	/^function BridgeIsTransferSet($frame) {$/;"	f
+BridgeOpField	customer-side/Protocols/wrapper.php	/^function BridgeOpField($frame) {$/;"	f
+BridgeOpFieldCheck	customer-side/Protocols/wrapper.php	/^function BridgeOpFieldCheck($frame, $expect) {$/;"	f
+BridgePropField	customer-side/Protocols/wrapper.php	/^function BridgePropField($frame) {$/;"	f
+BridgeTaskIDField	customer-side/Protocols/wrapper.php	/^function BridgeTaskIDField($frame) {$/;"	f
+BridgeTypeField	customer-side/Protocols/wrapper.php	/^function BridgeTypeField($frame) {$/;"	f
+BridgeTypeFieldCheck	customer-side/Protocols/wrapper.php	/^function BridgeTypeFieldCheck($frame, $expect) {$/;"	f
+Bridge_recv	customer-side/Protocols/bridge.php	/^    private function Bridge_recv($buffer, $flags) {     $/;"	f	class:BridgeEntry
+Bridge_recv_header	customer-side/Protocols/bridge.php	/^    private function Bridge_recv_header(&$buffer, $flags) {$/;"	f	class:BridgeEntry
+Bridge_retrive	customer-side/Protocols/bridge.php	/^    private function Bridge_retrive($receiver, &$args) {$/;"	f	class:BridgeEntry
+Bridge_send	customer-side/Protocols/bridge.php	/^    private function Bridge_send($buffer, $length, $flags) {$/;"	f	class:BridgeEntry
+CHANNEL_MAINTAIN	customer-side/Protocols/bridge.php	/^    private function CHANNEL_MAINTAIN($RTN, $buffer, $len, $flags) {$/;"	f	class:BridgeEntry
+CHANNEL_REBUILD	customer-side/Protocols/bridge.php	/^    private function CHANNEL_REBUILD($taskID) {$/;"	f	class:BridgeEntry
+DISPATCH_OVERHEAD	customer-side/config.php	/^define("DISPATCH_OVERHEAD", 2);$/;"	d
+DISPATCH_ROUNDROBIN	customer-side/config.php	/^define("DISPATCH_ROUNDROBIN", 1);$/;"	d
+DONE_BYTE	customer-side/config.php	/^define("DONE_BYTE", 0x0102);$/;"	d
+ENTRY_DOWN	customer-side/Protocols/definitions.php	/^define("ENTRY_DOWN", 0x00);$/;"	d
+ENTRY_UP	customer-side/Protocols/definitions.php	/^define("ENTRY_UP", 0x01);$/;"	d
+HostIdx	customer-side/config.php	/^define("HostIdx", 0);$/;"	d
+ID	customer-side/worker.php	/^    function ID() {$/;"	f	class:Job
+ID	customer-side/worker.php	/^    private $ID;$/;"	v	class:Worker
+Item	customer-side/Protocols/bridge.php	/^class Item {$/;"	c
+Job	customer-side/worker.php	/^class Job {$/;"	c
+MAX_NUM_OF_JOBS	customer-side/worker.php	/^    private $MAX_NUM_OF_JOBS;$/;"	v	class:Worker
+NUM_OF_PROCESSING_JOBS	customer-side/worker.php	/^    private $NUM_OF_PROCESSING_JOBS;$/;"	v	class:Worker
+ORDER_DO	customer-side/config.php	/^define("ORDER_DO", 0);$/;"	d
+ORDER_MOD	customer-side/config.php	/^define("ORDER_MOD", 1);$/;"	d
+PortIdx	customer-side/config.php	/^define("PortIdx", 1);$/;"	d
+READ_TO_RECV_BYTE	customer-side/config.php	/^define("READ_TO_RECV_BYTE", 0x0304);$/;"	d
+STATE	customer-side/worker.php	/^    private $STATE;$/;"	v	class:Worker
+SocketConnect_TCP	customer-side/util.php	/^function SocketConnect_TCP($address, $port) {$/;"	f
+WORKER_CONGESTED_STATE	customer-side/config.php	/^define("WORKER_CONGESTED_STATE", 3);$/;"	d
+WORKER_EMERGENCY_STATE, 4	customer-side/config.php	/^define("WORKER_EMERGENCY_STATE, 4");$/;"	d
+WORKER_FREE_STATE	customer-side/config.php	/^define("WORKER_FREE_STATE", 1);$/;"	d
+WORKER_NORMAL_STATE	customer-side/config.php	/^define("WORKER_NORMAL_STATE", 2);$/;"	d
+WORKER_UNKNOWN_STATE	customer-side/config.php	/^define("WORKER_UNKNOWN_STATE", 0);$/;"	d
+Worker	customer-side/worker.php	/^class Worker extends Thread {$/;"	c
+WorkerHouse	customer-side/worker.php	/^class WorkerHouse { $/;"	c
+__construct	customer-side/Protocols/bridge.php	/^    function __construct($address_, $port_) {$/;"	f	class:BridgeEntry
+__construct	customer-side/Protocols/bridge.php	/^    function __construct($type_, $op_, $property_, $seqID_, $flags_, $content_) {$/;"	f	class:Item
+__construct	customer-side/worker.php	/^    function __construct($address_, $port_) {$/;"	f	class:Worker
+__construct	customer-side/worker.php	/^    function __construct($disMethod_, $workerSet) {$/;"	f	class:WorkerHouse
+__construct	customer-side/worker.php	/^    function __construct($jobID_, $jobContent_) {$/;"	f	class:Job
+address	customer-side/Protocols/bridge.php	/^    private $address;$/;"	v	class:BridgeEntry
+bridgeEnry	customer-side/worker.php	/^    private $bridgeEnry;     $/;"	v	class:Worker
+content	customer-side/Protocols/bridge.php	/^    private $content;$/;"	v	class:Item
+content	customer-side/Protocols/bridge.php	/^    public function content() {$/;"	f	class:Item
+content	customer-side/worker.php	/^    function content() {$/;"	f	class:Job
+currentTask	customer-side/Protocols/bridge.php	/^    private $currentTask; $/;"	v	class:BridgeEntry
+dataHouseConnect	customer-side/dataHouse.php	/^function dataHouseConnect($dataHouseDoor, $host, $userName, $userPass, $dbName) {$/;"	f
+dbEntry	customer-side/Protocols/bridge.php	/^    private $dbEntry;$/;"	v	class:BridgeEntry
+dbEntry	customer-side/worker.php	/^    private $dbEntry;    $/;"	v	class:Worker
+disMethod	customer-side/worker.php	/^    private $disMethod;$/;"	v	class:WorkerHouse
+dispatch	customer-side/Protocols/bridge.php	/^    public function dispatch($taskID, $content_) {$/;"	f	class:BridgeEntry
+dispatch	customer-side/worker.php	/^    public function dispatch($job) {$/;"	f	class:WorkerHouse
+dispatchMethodArrary	customer-side/worker.php	/^    private $dispatchMethodArrary = array($/;"	v	class:WorkerHouse
+dispatcheMethod	customer-side/worker.php	/^    public function dispatcheMethod($method) {$/;"	f	class:WorkerHouse
+doJob	customer-side/worker.php	/^    public function doJob($job) {$/;"	f	class:Worker
+flags	customer-side/Protocols/bridge.php	/^    private $flags;$/;"	v	class:Item
+flags	customer-side/Protocols/bridge.php	/^    public function flags() {$/;"	f	class:Item
+generic_err	customer-side/util.php	/^function generic_err($msg) {$/;"	f
+getID	customer-side/worker.php	/^    public function getID() {$/;"	f	class:Worker
+getMaxNumOfJobs	customer-side/worker.php	/^    public function getMaxNumOfJobs() {$/;"	f	class:Worker
+getProcessingJobs	customer-side/worker.php	/^    public function getProcessingJobs() {$/;"	f	class:Worker
+houseEnter	customer-side/worker.php	/^    public function houseEnter($worker) {$/;"	f	class:WorkerHouse
+houseExit	customer-side/worker.php	/^    public function houseExit($address) {$/;"	f	class:WorkerHouse
+inProcessing	customer-side/Protocols/bridge.php	/^    private $inProcessing;$/;"	v	class:BridgeEntry
+isJobDone	customer-side/Protocols/bridge.php	/^    public function isJobDone($taskID) {$/;"	f	class:BridgeEntry
+isJobDone	customer-side/worker.php	/^    public function isJobDone($taskID) {$/;"	f	class:Worker
+isListening	customer-side/worker.php	/^    private $isListening;$/;"	v	class:Worker
+jobContent	customer-side/worker.php	/^    private $jobContent; $/;"	v	class:Job
+jobID	customer-side/worker.php	/^    private $jobID;$/;"	v	class:Job
+jobReceive	customer-side/worker.php	/^    public function jobReceive() { $/;"	f	class:Worker
+length	customer-side/Protocols/bridge.php	/^    private $length; $/;"	v	class:Item
+length	customer-side/Protocols/bridge.php	/^    public function length() {$/;"	f	class:Item
+message	customer-side/Protocols/bridge.php	/^    public function message() {$/;"	f	class:Item
+oneRowFetch	customer-side/dataHouse.php	/^function oneRowFetch($sqlStmt, $conn) {$/;"	f
+op	customer-side/Protocols/bridge.php	/^    private $op;$/;"	v	class:Item
+op	customer-side/Protocols/bridge.php	/^    public function op() {$/;"	f	class:Item
+overHead	customer-side/worker.php	/^    public function overHead() {$/;"	f	class:Worker
+overheadDispatch	customer-side/worker.php	/^    private function overheadDispatch($job) {$/;"	f	class:WorkerHouse
+port	customer-side/Protocols/bridge.php	/^    private $port;$/;"	v	class:BridgeEntry
+property	customer-side/Protocols/bridge.php	/^    private $property;$/;"	v	class:Item
+rRobinDispatch	customer-side/worker.php	/^    private function rRobinDispatch($job) {$/;"	f	class:WorkerHouse
+readyTask	customer-side/Protocols/bridge.php	/^    private $readyTask;$/;"	v	class:BridgeEntry
+retrive	customer-side/Protocols/bridge.php	/^    public function retrive($taskID, $receiver, $args) {$/;"	f	class:BridgeEntry
+run	customer-side/worker.php	/^    private function run() {$/;"	f	class:Worker
+seqID	customer-side/Protocols/bridge.php	/^    private $seqID;$/;"	v	class:Item
+seqID	customer-side/Protocols/bridge.php	/^    public function seqID() {$/;"	f	class:Item
+setContent	customer-side/Protocols/bridge.php	/^    public function setContent($content_) {$/;"	f	class:Item
+setContent	customer-side/worker.php	/^    function setContent($jobContent_) {$/;"	f	class:Job
+setFlags	customer-side/Protocols/bridge.php	/^    public function setFlags($flags_) {$/;"	f	class:Item
+setID	customer-side/worker.php	/^    function setID($jobID_) {$/;"	f	class:Job
+setMaxNumOfJobs	customer-side/worker.php	/^    public function setMaxNumOfJobs($num) {$/;"	f	class:Worker
+setOp	customer-side/Protocols/bridge.php	/^    public function setOp($op_) {$/;"	f	class:Item
+setSeqID	customer-side/Protocols/bridge.php	/^    public function setSeqID($seqID_) {$/;"	f	class:Item
+setState	customer-side/worker.php	/^    public function setState($stateCode) {$/;"	f	class:Worker
+setType_	customer-side/Protocols/bridge.php	/^    public function setType_($type_) {$/;"	f	class:Item
+socket	customer-side/Protocols/bridge.php	/^    private $socket;  $/;"	v	class:BridgeEntry
+socket_err	customer-side/util.php	/^function socket_err($func) {$/;"	f
+socket_recv_wrapper	customer-side/Protocols/wrapper.php	/^function socket_recv_wrapper($socket, &$buffer, &$lenShouldRecv, $flags) {$/;"	f
+socket_send_wrapper	customer-side/Protocols/wrapper.php	/^function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {$/;"	f
+sortIntoIndex	customer-side/util.php	/^function sortIntoIndex($array) {$/;"	f
+state	customer-side/Protocols/bridge.php	/^    private $state;$/;"	v	class:BridgeEntry
+state	customer-side/worker.php	/^    public function state() { $/;"	f	class:Worker
+swap	customer-side/util.php	/^function swap(&$left, &$right) {$/;"	f
+taskIDAlloc	customer-side/Protocols/bridge.php	/^    public function taskIDAlloc() {$/;"	f	class:BridgeEntry
+type	customer-side/Protocols/bridge.php	/^    private $type;$/;"	v	class:Item
+type	customer-side/Protocols/bridge.php	/^    public function type() {$/;"	f	class:Item
+wait	customer-side/Protocols/bridge.php	/^    public function wait() {$/;"	f	class:BridgeEntry
+waitTask	customer-side/Protocols/bridge.php	/^    private $waitTask;$/;"	v	class:BridgeEntry
+wareHouse	customer-side/worker.php	/^    private $wareHouse;$/;"	v	class:WorkerHouse
+workerInfo	customer-side/worker.php	/^    public function workerInfo($wID) {$/;"	f	class:WorkerHouse
+workerList	customer-side/config.php	/^$workerList = array($/;"	v
+workers	customer-side/worker.php	/^    private $workers;$/;"	v	class:WorkerHouse
