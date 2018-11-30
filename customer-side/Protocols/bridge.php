@@ -206,7 +206,7 @@ class BridgeEntry {
             $buffer, $length, $flags); 
     }
 
-    private function Bridge_recv($buffer, $flags) {     
+    private function Bridge_recv(&$buffer, $flags) {     
         $headerBuffer = null;
 
         $nBytes = $this->Bridge_recv_header($this->$socket, $headerBuffer, $flags);             
@@ -226,19 +226,21 @@ class BridgeEntry {
 
     private function Bridge_recv_header(&$buffer, $flags) {
         $len = BRIDGE_FRAME_HEADER_LEN;
+        $rlen = &$len; 
         return $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->$socket, $buffer,
-            &$len, $flags); 
+            $len, $flags); 
     }
 
-    private function Bridge_retrive($receiver, &$args) {
+    private function Bridge_retrive($receiver, $args) {
         $buffer = null;
         $len = BRIDGE_MAX_SIZE_OF_BUFFER;
         while (TRUE) {
             $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->$socket, $buffer,
                 $len, NULL); 
-            BridgeIsTransfer($buffer) ?
-                receiver($args, BridgeContentField($buffer)) :
-                if (BridgeIsTransDoneSet($buffer)) return TRUE;
+            if (BridgeIsTransfer($buffer)) {
+                receiver($args, BridgeContentField($buffer));
+            } else if (BridgeIsTransDoneSet($buffer)) 
+                return TRUE;
         } 
     }
 
