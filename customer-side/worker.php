@@ -145,7 +145,7 @@ class WorkerHouse {
     }
 }
 
-class Worker extends Thread {
+class Worker {
     /* Connection */
     private $bridgeEnry;     
     private $dbEntry;    
@@ -177,8 +177,8 @@ class Worker extends Thread {
         return $bridgeEntry->isJobDone($taskID);  
     }
 
-    public function jobReceive() { 
-        /* Implement it after protocols has been designed. */ 
+    public function jobReceive($taskID, $receiver, $args) { 
+        return $this->$bridgeEnry->retrive($taskID, $receiver, $args);
     }
 
     public function getID() {
@@ -209,19 +209,11 @@ class Worker extends Thread {
         $taskID = $this->bridgeEnry->taskIDAlloc(); 
         $content = $job->content();
          
-        $bridgeEntry->dispatch($taskID, $content); 
-        if ($this->$isListening == FALSE) {
-           $this->start(); 
-        }
-        $this->$isListening = TRUE;
-
+        if ($bridgeEntry->dispatch($taskID, $content) == FALSE)
+            $taskID = -1; 
         return $taskID; 
     }
     
-    private function run() {
-             
-    }
-
     public function state() { 
         return $this->$STATE; 
     }
