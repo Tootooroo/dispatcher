@@ -35,11 +35,10 @@ class WorkerHouse {
     private function rRobinDispatch($job) {
         static $currentIdx = 0;
         $workersRef = $this->$workers;
-        $numOfWorkers = $workersRef->count();
+        $theWorker = current($workersRef); 
 
-        $theWorker = $workerRef->offsetGet($currentIdx++);   
-        if ($currentIdx > $numOfWorkers)
-            $currentIdx = 0;
+        next($workersRef); 
+
         $ret = $theWorker->doJob($job);
         if ($ret != 0) 
             return -1;
