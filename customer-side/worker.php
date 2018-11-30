@@ -7,34 +7,6 @@ include "Protocols/definitions.php";
 include "Protocols/wrapper.php";
 include "Protocols/bridge.php";
 
-class Job {
-    private $jobID;
-    private $jobContent; 
-    
-    function __construct($jobID_, $jobContent_) {
-        $this->$jobID = $jobID_;
-        $this->$jobContent = $jobContent_;
-    }
-
-    function ID() {
-        return $this->$jobID; 
-    }
-
-    function setID($jobID_) {
-        $this->$jobID = $jobID_; 
-        return TRUE;
-    }
-
-    function content() {
-        return $this->$jobContent; 
-    }
-
-    function setContent($jobContent_) {
-        $this->$jobContent = $jobContent_;
-        return TRUE; 
-    }
-}
-
 class WorkerHouse { 
     // 0: Weigthed Round Robin
     // 1: Dispatch by overhead of workers
@@ -49,16 +21,12 @@ class WorkerHouse {
     function __construct($disMethod_, $workerSet) {
         $this->$disMethod = $disMethod_; 
         
-        $workers = new splDoublyLinkedList();
-        $wareHouse = new splDoublyLinkedList();
+        $this->$workers = array();
+        $this->$wareHouse = array(); 
 
         foreach ($workerSet as $worker) {
-            $worker = new Worker($worker[HostIdx], $worker[PortIdx]);
-            $this->houseEnter($worker); 
-            if ($worker->connect()) {
-                // Connect error set the state of worker to unknow
-                $worker->setState(WORKER_UNKNOWN_STATE); 
-            }
+            $workerInst = new Worker($worker["id"], $worker["addr"], $worker["port"]);
+            $this->houseEnter($worker["id"], $workerInst); 
         }
     }
 
@@ -110,26 +78,36 @@ class WorkerHouse {
         return 0;
     }
 
-    public function houseEnter($worker) {
+    public function houseEnter($id, $worker) {
         if ($worker) {
-            $this->$workers.add(0, $worker);  
+            $this->$workers[$id] = $worker; 
         }
     }  
 
-    public function houseExit($address) {
-        $begin = $this->$workers->current();
-        $iter = $this->$workers;
-        while ($iter->current().addr() != $address) {
-            $iter->next(); 
-            if ($iter->current == $begin)
-                return -1;
-        }            
-        $iter.offsetUnset($iter->key());
+    public function houseExit($id) {
+        if (array_key_exists($id, $this->$workers))
+            $this->$workers[$id] = null;
         return 0;
     } 
 
     public function dispatch($job) {
-        return $this->$dispatchMethodArrary[$disMethod]($job);        
+        $pair = $this->$dispatchMethodArrary[$disMethod]($job);        
+        $wID = $pair['wID'];
+        $jID = $pair['jID'];
+
+        if (array_key_exists($jID, $this->$wareHouse) == FALSE) {
+            $this->$wareHouse[$jID] = $wID; 
+        } else {
+            // This situation must impossible.
+            return null; 
+        }
+
+        return $jID;
+    }
+
+    public function retrive($taskID, $receiver, $args) {
+        $worker = $this->$workers[$this->$wareHouse[$taskID]];
+        return $worker->jobReceive($taskID, $receiver, $args);
     }
 
     public function dispatcheMethod($method) {
@@ -139,10 +117,6 @@ class WorkerHouse {
         }
         return -1;
     } 
-
-    public function workerInfo($wID) {
-    
-    }
 }
 
 class Worker {
@@ -163,7 +137,8 @@ class Worker {
     // 4: Emergency
     private $STATE;
 
-    function __construct($address_, $port_) {
+    function __construct($ID_, $address_, $port_) {
+        $this->$ID = $ID_;
         $this->$bridgeEntry = new BridgeEntry($address_, $port_);
         $ret = $bridgeEntry->connect();
         $this->$isListening = FALSE;
@@ -211,7 +186,7 @@ class Worker {
          
         if ($bridgeEntry->dispatch($taskID, $content) == FALSE)
             $taskID = -1; 
-        return $taskID; 
+        return array('wID' => $this->$ID, 'jID' => $taskID); 
     }
     
     public function state() { 

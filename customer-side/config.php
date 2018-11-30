@@ -25,6 +25,6 @@ define("DONE_BYTE", 0x0102);
 define("READ_TO_RECV_BYTE", 0x0304);
 
 $workerList = array(
-    array("10.5.2.22", 8012)
+    array("id" => "WORKER_1", "addr" => "10.5.2.22", "port" => 8012)
 );
 
