@@ -38,6 +38,10 @@ define("BRIDGE_FLAG_IS_JOB_DONE", 0x0100);
 define("BRIDGE_FLAG_RECOVER", 0x0200);
 define("BRIDGE_FLAG_JOB_DONE", 0x0400);
 
+// Recover options
+define("BRIDGE_RECOVER_RESTART", 0);
+define("BRIDGE_RECOVER_CONTINUE", 1);
+
 // Bridge Property Field Constant Specific Property is pending
 
 

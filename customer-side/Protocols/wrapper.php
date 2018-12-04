@@ -6,7 +6,7 @@
 function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {
     while ($lenShouldSent > 0) {
         $nBytes = socket_send($socket, $message, $lenShouldSent, $flags);
-        if ($nBytes == FALSE) 
+        if ($nBytes == FALSE || $nBytes == 0) 
             return FALSE;
         if ($nBytes < $lenShouldSent) {
             $lenShouldSent = $lenShouldSent - $nBytes;
@@ -19,7 +19,7 @@ function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {
 function socket_recv_wrapper($socket, &$buffer, &$lenShouldRecv, $flags) {
     while ($lenShouldRecv > 0) {
         $nBytes = socket_recv($socket, $recvBuffer, $lenShouldRecv, $flags);
-        if ($nBytes == FALSE) {
+        if ($nBytes == FALSE || $nBytes == 0) {
             return FALSE; 
         }
         if ($nBytes < $lenShouldRecv) {
