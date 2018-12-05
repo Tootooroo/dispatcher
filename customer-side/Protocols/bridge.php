@@ -6,7 +6,7 @@ include "wrapper.php";
 include "definitions.php";
 include "../util.php";
 
-class Item {
+class BridgeMsg {
     private $type;
     private $op;
     private $property;
@@ -134,7 +134,7 @@ class BridgeEntry {
         $this->$currentTask = $taskID; 
         $this->$inProcessing->add($taskID);
 
-        $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, NULL, $content_);
+        $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, NULL, $content_);
         $message = $item->message();
          
         Bridge_send($this->$socket, $message, $item->length(), NULL);
@@ -150,7 +150,7 @@ class BridgeEntry {
         $buffer = NULL;
         
         $this->$currentTask = $taskID;
-        $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, 
+        $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, 
             BRIDGE_FLAG_RETRIVE, BRIDGE_FRAME_HEADER_LEN); 
 
         // fixme: Three handshake may be better for stablility
@@ -173,7 +173,7 @@ class BridgeEntry {
 
     public function isJobDone($taskID) {
         $buffer = NULL;
-        $item = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID,
+        $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID,
             BRIDGE_FLAG_IS_DONE, BRIDGE_FRAME_HEADER_LEN); 
         Bridge_send($this->$socket, $item->message(), $item->length(), NULL);
         Bridge_recv($this->$socket, $buffer, NULL);
@@ -261,7 +261,7 @@ class BridgeEntry {
         } 
         if ($recover == BRIDGE_RECOVER_CONTINUE) {
             $buffer = NULL;
-            $recoverReq = new Item(BRIDGE_TYPE_REQUEST, NULL, NULL, 
+            $recoverReq = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, 
                 $this->$currentTask, BRIDGE_FLAG_RECOVER, BRIDGE_FRAME_HEADER_LEN);
             $ret = $this->Bridge_send($this->$socket, $recoverReq->message(),
                 $item->length(), NULL);

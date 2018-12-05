@@ -3,24 +3,54 @@
 import socket
 import struct
 import wrapper
+import time
 import mysql.connector
 from definitions import CONST
 import ../config.CONST as DB_CONST
 
-class Task:
-    pass
+class TaskManage:
+    def __init__(self, taskID):
+        # Task states 
+        self.taskID = taskID
+        self.lastSeekDistance = 0  
+        self.jobStatus = CONST.BRIDGE_TASK_STATUS_PENDING   
+        self.descriptor = 0
 
-class Item: 
+        # Task callback
+        self.__rollback = 0
+        self.__retrive = 0
+        self.__reset = 0
+
+    def rollbackRtnSet(self, rtn):
+        self.__rollback = rtn
+
+    def retriveRtnSet(self, rtn):
+        self.__retrive = rtn
+
+    def resetRtnSet(self, rtn):
+        self.__reset = rtn
+
+    # Rollback to last success state 
+    def rollback(self):
+        return self.__rollback(self)
+
+    def retrive(self, size):
+        return self.__retrive(self, size)
+
+    def reset(self):
+        return self.__reset(self)
+
+class BridgeMsg: 
     # Notes: if content is a string must be convert to ascii before
     #        calling of __init__().
-    def __init__(self, type_, op_. prop_, taskID_, flags_, content_):
+    def __init__(type_, op_. prop_, taskID_, flags_, content_ = b''):
         self.__type = type_
         self.__op = op_
         self.__prop = prop_
         self.__taskID = taskID_
         self.__flags = flags_
         self.__content = content_
-        self.__length = 0
+        self.__length = CONST.BRIDGE_FRAME_HEADER_LEN + len(content_) 
     
     def flags(self):
         return self.__flags 
@@ -72,30 +102,126 @@ class Item:
         return self.__length
 
 class BridgeEntry:  
-    def __init__(self, address_, port_):
-        # Socket initialization
-        self.__address = address_    
-        self.__port = port_
-        self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-        self.__socket.bind(address_, port_)
-        
-        # Task info
-        # Format of Tasktbl
-        # | TID | 
-        self.__taskTbl = []
 
-        # Database connection initialization
-        try:
-            self.__dbEntry = mysql.connector.connect(user = DB_CONST.DB_USERNAME, 
-                    password = DB_CONST.DB_PASSWORD, host = DB_CONST.DB_ADDR, 
-                    database = DB_CONST.DB_DATABASE) 
-        except:
-            print("BridgeEntry Init: mysql.connector.connect failed\n")
-            self.__dbEntry.close()
-    
-    def accept():
+    # Task info
+    # Format of Tasktbl
+    # | TID | JobTransRtn | ContinueRtn | Info
+    __taskTbl = {}
+
+    def __init__(self, sock):
+        # Socket initialization
+        self.__socket = sock 
+
+    def __newTask(self, taskID):
+        BridgeEntry.__taskTbl[str(taskID)] = TaskManage()
+
+    def __rmTask(self, taskID):
+        del BridgeEntry.__taskTbl[str(taskID)]
+
+    def taskTaskManageGet(self, taskID):
+        return BridgeEntry.__taskTbl[str(taskID)] 
+
+    def __requestProcessing(self, frame):
+        taskID = wrapper.BridgeTaskIDField(frame) 
+        flags = wrapper.BridgeFlagField(frame)  
+        content = wrapper.BridgeContentField(frame)
+        
+        taskID_str = str(taskID)
+
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID_str, CONST.BRIDGE_FLAG_ERROR)
+
+        if BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_NOTIFY): 
+            # A new task is arrived.
+            self.__newTask(taskID) 
+            return (taskID_str, content)
+
+        elif BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_RECOVER):
+            # Recover request
+ 
+            # First to check is the TaskID exist.
+            if taskID_str in BridgeEntry.__taskTbl:
+                msg.setFlags(CONST.BRIDGE_FLAG_RECOVER)
+                Bridge_send(msg.message())
+            else:
+                msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
+                Bridge_send(msg.message())
+                return False
+            taskMng = BridgeEntry.__taskTbl[taskID_str]
+            
+            msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
+            msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
+            contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
+
+            while chunk = taskMng.retrive(contentSize):
+                msg.setContent(chunk) 
+                nBytes = Bridge_send(msg.message())
+                if nBytes == 0:
+                    taskMng.rollBack()
+                    return False
+
+        elif BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_IS_JOB_DONE):
+            # Job processing query
+            if taskID_str in BridgeEntry.__taskTbl:
+                if BridgeEntry.__taskTbl[taskID_str].isTaskFinished():
+                    msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
+                    Bridge_send(msg.message())  
+                else:
+                    msg.setFlags(CONST.BRIDGE_FLAG_EMPTY) 
+                    Bridge_send(msg.message())
+            else:
+                msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
+                Bridge_send(msg.message())
+                return False
+
+        elif BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_RETRIVE):
+            # Task result retrive
+            if taskID_str in BridgeEntry.__taskTbl:
+                msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
+                Bridge_send(msg.message())
+
+                # While a little while
+                # if this delay case performance problem
+                # or stable problem we may need to use 
+                # three way hand shake.
+                time.sleep(0.1) 
+                
+                msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
+                msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER)
+                
+                contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
+                while chunk = taskMng.retrive(contentSize)
+                    msg.setContent(chunk)
+                    nBytes = Bridge_send(msg.message())
+                    if nBytes == 0:
+                        taskMng.rollBack()
+                        return False
+        else:
+            msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
+            Bridge_send(msg.message())
+            
+    def __infoProcessing(self, frame):
+        pass
+
+    def __management(self, frame):
+        pass
+
+    def accept(slef):
+        frame = []
+
+        self.Bridge_recv(frame, flags)
+
+        if wrapper.BridgeIsRequest(frame):
+            return self.__requestProcessing(frame)
+        elif wrapper.BridgeIsInfo(frame):
+            return self.__infoProcessing
+        elif wrapper.BridgeIsManagement(frame):
+            return self.__management(frame)
+        else:
+            return False 
          
-    
+    def done(self):
+        pass
+
     # Protocol data unit
     def Bridge_send(self, frame, flags):
         return wrapper.socket_send_wrapper(self.sock, frame, flags)
@@ -106,7 +232,5 @@ class BridgeEntry:
         return wrapper.socket_recv_wrapper(self.sock, frameHeader, 
                 CONST.BRIDGE_FRAME_HEADER_LEN, flags)
     def Bridge_transfer(data): 
-        pass 
-    
-
+        pass  
 

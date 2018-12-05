@@ -34,6 +34,7 @@ class CONST:
     BRIDGE_OP_SET = 0x03
 
     # Bridge flag field constant
+    BRIDGE_FLAG_EMPTY = 0x0000
     BRIDGE_FLAG_NOTIFY = 0x0001
     BRIDGE_FLAG_TRANSFER = 0x0002
     BRIDGE_FLAG_TRANSFER_DONE = 0x0004
@@ -47,5 +48,12 @@ class CONST:
     BRIDGE_FLAG_JOB_DONE = 0x0400
 
     # Bridge property field constant specific property is pending
+    #
+    #
 
+    # Bridge task status
+    BRIDGE_TASK_STATUS_FAILED = 1
+    BRIDGE_TASK_STATUS_SUCCESS = 0
+    BRIDGE_TASK_STATUS_IN_PROCESSING = 2
+    BRIDGE_TASK_STATUS_PENDING = 3
 
