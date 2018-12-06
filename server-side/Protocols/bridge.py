@@ -43,7 +43,7 @@ class TaskManage:
 class BridgeMsg: 
     # Notes: if content is a string must be convert to ascii before
     #        calling of __init__().
-    def __init__(type_, op_. prop_, taskID_, flags_, content_ = b''):
+    def __init__(type_, op_. prop_, taskID_, flags_, content_ = b""):
         self.__type = type_
         self.__op = op_
         self.__prop = prop_
