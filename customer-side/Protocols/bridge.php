@@ -16,39 +16,39 @@ class BridgeMsg {
     private $content;
 
     function __construct($type_, $op_, $property_, $seqID_, $flags_, $content_) {
-        $this->$type =  $type_; 
-        $this->$op = $op_;
-        $this->$property = $property_;
-        $this->$flags = $flags_;
-        $this->$length = BRIDGE_FRAME_HEADER_LEN + strlen($content_);
-        $this->$seqID = $seqID_;
-        $this->$content = $content_;
+        $this->type =  $type_; 
+        $this->op = $op_;
+        $this->property = $property_;
+        $this->flags = $flags_;
+        $this->length = BRIDGE_FRAME_HEADER_LEN + strlen($content_);
+        $this->seqID = $seqID_;
+        $this->content = $content_;
 
         return 0;
     }
 
     public function flags() {
-        return $this->$flags; 
+        return $this->flags; 
     }
 
     public function setFlags($flags_) {
         // You may need to check whether is
         // flags value is valid.
-        $this->$flags = $flags_; 
+        $this->flags = $flags_; 
         return 0;
     }
 
     public function seqID() {
-        return $this->$seqID; 
+        return $this->seqID; 
     }
 
     public function setSeqID($seqID_) {
-        $this->$seqID = $seqID_; 
+        $this->seqID = $seqID_; 
         return 0;
     }
 
     public function type() {
-        return $this->$type; 
+        return $this->type; 
     }
 
     public function setType_($type_) {
@@ -58,12 +58,12 @@ class BridgeMsg {
         if ($check) 
             return 1; 
 
-        $this->$type = $type_; 
+        $this->type = $type_; 
         return 0;
     }     
 
     public function op() {
-        return $this->$op; 
+        return $this->op; 
     }
 
     public function setOp($op_) {
@@ -73,28 +73,28 @@ class BridgeMsg {
         if ($check) 
             return 1;
 
-        $this->$op = $op_;
+        $this->op = $op_;
         return 0;
     }
     
     public function content() {
-        return $this->$content; 
+        return $this->content; 
     }
 
     public function setContent($content_) {
-        $this->$content = $content_; 
+        $this->content = $content_; 
         return 0;
     }
 
     public function message() {
-        $message = pack(BRIDGE_FRAME_FORMAT, $this->$type,
-            $this->$op, $this->$property, $this->$seqID, 
-            $this->$flags, BRIDGE_FRAME_FORMAT);
+        $message = pack(BRIDGE_FRAME_FORMAT, $this->type,
+            $this->op, $this->property, $this->seqID, 
+            $this->flags, BRIDGE_FRAME_FORMAT);
         return $message; 
     }
      
     public function length() {
-        return $this->$length; 
+        return $this->length; 
     }
 }
 
@@ -112,15 +112,15 @@ class BridgeEntry {
     private $inProcessing;
 
     function __construct($address_, $port_) {
-        $this->$address = $address_;
-        $this->$port = $port_; 
-        $this->$socket = SocketConnect_TCP($address_, $port_);
-        $this->$state = $this->$socket == null ? ENTRY_DOWN : ENTRY_UP;
+        $this->address = $address_;
+        $this->port = $port_; 
+        $this->socket = SocketConnect_TCP($address_, $port_);
+        $this->state = $this->socket == null ? ENTRY_DOWN : ENTRY_UP;
 
-        $this->$currentTask = 0;
-        $this->$waitTask = new splQueue();
-        $this->$readyTask = new splDoublyLinkedList();
-        $this->$inProcessing = new splDoublyLinkedList();
+        $this->currentTask = 0;
+        $this->waitTask = new splQueue();
+        $this->readyTask = new splDoublyLinkedList();
+        $this->inProcessing = new splDoublyLinkedList();
 
         return 0;
     }
@@ -131,14 +131,14 @@ class BridgeEntry {
         $lenShouldSent = 0;
         
         // Frame generation.
-        $this->$currentTask = $taskID; 
-        $this->$inProcessing->add($taskID);
+        $this->currentTask = $taskID; 
+        $this->inProcessing->add($taskID);
 
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, NULL, $content_);
         $message = $item->message();
          
-        Bridge_send($this->$socket, $message, $item->length(), NULL);
-        Bridge_recv($this->$socket, $buffer, NULL);  
+        Bridge_send($this->socket, $message, $item->length(), NULL);
+        Bridge_recv($this->socket, $buffer, NULL);  
         if (!BridgeIsReply($buffer)) 
             return FALSE;
 
@@ -149,15 +149,15 @@ class BridgeEntry {
     public function retrive($taskID, $receiver, $args) {
         $buffer = NULL;
         
-        $this->$currentTask = $taskID;
+        $this->currentTask = $taskID;
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID, 
             BRIDGE_FLAG_RETRIVE, BRIDGE_FRAME_HEADER_LEN); 
 
         // fixme: Three handshake may be better for stablility
         //        but Transfer layer provide transfer buffer for us, so it's
         //        not a problem.
-        Bridge_send($this->$socket, $item->message(), $item->length(), NULL);
-        Bridge_recv($this->$socket, $buffer, NULL);
+        Bridge_send($this->socket, $item->message(), $item->length(), NULL);
+        Bridge_recv($this->socket, $buffer, NULL);
         if (!BridgeIsReply($buffer) || !BridgeIsReadyToSendSet($buffer))
            return FALSE;  
         $ret = $this->Bridge_retrive($receiver, $args);
@@ -175,8 +175,8 @@ class BridgeEntry {
         $buffer = NULL;
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID,
             BRIDGE_FLAG_IS_DONE, BRIDGE_FRAME_HEADER_LEN); 
-        Bridge_send($this->$socket, $item->message(), $item->length(), NULL);
-        Bridge_recv($this->$socket, $buffer, NULL);
+        Bridge_send($this->socket, $item->message(), $item->length(), NULL);
+        Bridge_recv($this->socket, $buffer, NULL);
         if (!BridgeIsReply($buffer))
             return FALSE;
         if (BridgeIsIsJobDoneSet($buffer))
@@ -189,12 +189,12 @@ class BridgeEntry {
     public function wait() {
         $buffer = NULL;
         
-        if ($this->$inProcessing->isEmpty())
+        if ($this->inProcessing->isEmpty())
             return FALSE;
-        if (Bridge_recv($this->$socket, $buffer, NULL))
+        if (Bridge_recv($this->socket, $buffer, NULL))
             return FALSE;
         if (BridgeIsInfo($buffer) && BridgeIsJobDoneSet($buffer)) {
-            $this->$readyTask->add(BridgeTaskIDField($buffer)); 
+            $this->readyTask->add(BridgeTaskIDField($buffer)); 
             // Remove task from inProcessing list.
 
             return TRUE;
@@ -203,21 +203,21 @@ class BridgeEntry {
 
     /* Lower level connection-related function */
     private function Bridge_send($buffer, $length, $flags) {
-        return $this->CHANNEL_MAINTAIN('socket_send_wrapper', $this->$socket, 
+        return $this->CHANNEL_MAINTAIN('socket_send_wrapper', $this->socket, 
             $buffer, $length, $flags); 
     }
 
     private function Bridge_recv(&$buffer, $flags, $recover) {     
         $headerBuffer = null;
 
-        $nBytes = $this->Bridge_recv_header($this->$socket, $headerBuffer, $flags);             
+        $nBytes = $this->Bridge_recv_header($this->socket, $headerBuffer, $flags);             
         if ($nBytes == FALSE || Bridge_header_validate($headerBuffer) == FALSE) {
             return FALSE; 
         }
         $header = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $headerBuffer); 
         $length = $header['length'];
         $length = $length - BRIDGE_FRAME_HEADER_LEN;
-        $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->$socket, $buffer,
+        $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->socket, $buffer,
             $length, $flags, $recover); 
         if ($nBytes == FALSE) {
             return FALSE; 
@@ -228,7 +228,7 @@ class BridgeEntry {
     private function Bridge_recv_header(&$buffer, $flags, $recover) {
         $len = BRIDGE_FRAME_HEADER_LEN;
         $rlen = &$len; 
-        return $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->$socket, $buffer,
+        return $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->socket, $buffer,
             $len, $flags, $recover); 
     }
 
@@ -236,7 +236,7 @@ class BridgeEntry {
         $buffer = null;
         $len = BRIDGE_MAX_SIZE_OF_BUFFER;
         while (TRUE) {
-            $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->$socket, $buffer,
+            $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $this->socket, $buffer,
                 $len, NULL, $recover); 
             if (BridgeIsTransfer($buffer)) {
                 receiver($args, BridgeContentField($buffer));
@@ -247,7 +247,7 @@ class BridgeEntry {
 
     private function CHANNEL_MAINTAIN($RTN, $buffer, $len, $flags, $recover) {
         do {
-            $ret = RTN($this->$socket, $buffer, $len, $flags); 
+            $ret = RTN($this->socket, $buffer, $len, $flags); 
             if ($ret == FALSE)
                 $this->CHANNEL_REBUILD($recover);
         } while ($ret == FALSE);
@@ -255,19 +255,19 @@ class BridgeEntry {
 
     private function CHANNEL_REBUILD($recover) {
         while (TRUE) {
-            $this->$socket = SocketConnect_TCP($address, $port); 
-            if ($this->$socket)
+            $this->socket = SocketConnect_TCP($address, $port); 
+            if ($this->socket)
                 break;
         } 
         if ($recover == BRIDGE_RECOVER_CONTINUE) {
             $buffer = NULL;
             $recoverReq = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, 
-                $this->$currentTask, BRIDGE_FLAG_RECOVER, BRIDGE_FRAME_HEADER_LEN);
-            $ret = $this->Bridge_send($this->$socket, $recoverReq->message(),
+                $this->currentTask, BRIDGE_FLAG_RECOVER, BRIDGE_FRAME_HEADER_LEN);
+            $ret = $this->Bridge_send($this->socket, $recoverReq->message(),
                 $item->length(), NULL);
             if ($ret == FALSE)
                 return FALSE;
-            if ($this->Bridge_recv($this->$socket, $buffer, NULL) == FALSE)
+            if ($this->Bridge_recv($this->socket, $buffer, NULL) == FALSE)
                 return FALSE;
             if (!BridgeIsReply($buffer) || !BridgeIsRecoverSet($buffer))
                 return FALSE;

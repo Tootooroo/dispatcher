@@ -19,10 +19,10 @@ class WorkerHouse {
     );
     
     function __construct($disMethod_, $workerSet) {
-        $this->$disMethod = $disMethod_; 
+        $this->disMethod = $disMethod_; 
         
-        $this->$workers = array();
-        $this->$wareHouse = array(); 
+        $this->workers = array();
+        $this->wareHouse = array(); 
 
         foreach ($workerSet as $worker) {
             $workerInst = new Worker($worker["id"], $worker["addr"], $worker["port"]);
@@ -34,7 +34,7 @@ class WorkerHouse {
     // not to use this dispatch method.
     private function rRobinDispatch($job) {
         static $currentIdx = 0;
-        $workersRef = $this->$workers;
+        $workersRef = $this->workers;
         $theWorker = current($workersRef); 
 
         next($workersRef); 
@@ -46,7 +46,7 @@ class WorkerHouse {
     }
          
     private function overheadDispatch($job) {
-        $workerRef = $this->$workers;
+        $workerRef = $this->workers;
         $overheadArray = array(); 
         $numOfWorkers = $workersRef->count();
 
@@ -79,23 +79,23 @@ class WorkerHouse {
 
     public function houseEnter($id, $worker) {
         if ($worker) {
-            $this->$workers[$id] = $worker; 
+            $this->workers[$id] = $worker; 
         }
     }  
 
     public function houseExit($id) {
-        if (array_key_exists($id, $this->$workers))
-            $this->$workers[$id] = null;
+        if (array_key_exists($id, $this->workers))
+            $this->workers[$id] = null;
         return 0;
     } 
 
     public function dispatch($job) {
-        $pair = $this->$dispatchMethodArrary[$disMethod]($job);        
+        $pair = $this->dispatchMethodArrary[$disMethod]($job);        
         $wID = $pair['wID'];
         $jID = $pair['jID'];
 
-        if (array_key_exists($jID, $this->$wareHouse) == FALSE) {
-            $this->$wareHouse[$jID] = $wID; 
+        if (array_key_exists($jID, $this->wareHouse) == FALSE) {
+            $this->wareHouse[$jID] = $wID; 
         } else {
             // This situation must impossible.
             return null; 
@@ -105,13 +105,13 @@ class WorkerHouse {
     }
 
     public function retrive($taskID, $receiver, $args) {
-        $worker = $this->$workers[$this->$wareHouse[$taskID]];
+        $worker = $this->workers[$this->wareHouse[$taskID]];
         return $worker->jobReceive($taskID, $receiver, $args);
     }
 
     public function dispatcheMethod($method) {
         if ($method == 0 || $method == 1) {
-            $this->$disMethod = $method; 
+            $this->disMethod = $method; 
             return 0;
         }
         return -1;
@@ -137,13 +137,13 @@ class Worker {
     private $STATE;
 
     function __construct($ID_, $address_, $port_) {
-        $this->$ID = $ID_;
-        $this->$bridgeEntry = new BridgeEntry($address_, $port_);
+        $this->ID = $ID_;
+        $this->bridgeEntry = new BridgeEntry($address_, $port_);
         $ret = $bridgeEntry->connect();
-        $this->$isListening = FALSE;
+        $this->isListening = FALSE;
         $ret == ENTRY_DOWN ? 
-            $this->$STATE = WORKER_UNKNOWN_STATE :
-            $this->$STATE = WORKER_NORMAL_STATE;
+            $this->STATE = WORKER_UNKNOWN_STATE :
+            $this->STATE = WORKER_NORMAL_STATE;
         return 0; 
     }
 
@@ -152,29 +152,29 @@ class Worker {
     }
 
     public function jobReceive($taskID, $receiver, $args) { 
-        return $this->$bridgeEnry->retrive($taskID, $receiver, $args);
+        return $this->bridgeEnry->retrive($taskID, $receiver, $args);
     }
 
     public function getID() {
-        return $this->$ID; 
+        return $this->ID; 
     }
 
     public function overHead() {
         $overHeadSql = "SELECT overhead FROM worker where address = " .
-            $this->$address . ";"; 
+            $this->address . ";"; 
     
-        if ($this->$STATE == WORKER_UNKNOWN_STATE) {
+        if ($this->STATE == WORKER_UNKNOWN_STATE) {
             return -1; 
         } 
 
-        $this->$row = oneRowFetch($overHeadSql, $this->$dbEntry);
-        $this->$NUM_OF_PROCESSING_JOBS = $row[1];
-        $this->$MAX_NUM_OF_JOBS = $row[2];
-        $this->$STATE = $row[3];
+        $this->row = oneRowFetch($overHeadSql, $this->dbEntry);
+        $this->NUM_OF_PROCESSING_JOBS = $row[1];
+        $this->MAX_NUM_OF_JOBS = $row[2];
+        $this->STATE = $row[3];
 
         // Overhead calculate
-        $overHead = ($this->$NUM_OF_PROCESSING_JOBS / $this->$MAX_NUM_OF_JOBS) 
-            * $this->$MAX_NUM_OF_JOBS; 
+        $overHead = ($this->NUM_OF_PROCESSING_JOBS / $this->MAX_NUM_OF_JOBS) 
+            * $this->MAX_NUM_OF_JOBS; 
         return $overHead;
     }
     
@@ -185,33 +185,33 @@ class Worker {
          
         if ($bridgeEntry->dispatch($taskID, $content) == FALSE)
             $taskID = -1; 
-        return array('wID' => $this->$ID, 'jID' => $taskID); 
+        return array('wID' => $this->ID, 'jID' => $taskID); 
     }
     
     public function state() { 
-        return $this->$STATE; 
+        return $this->STATE; 
     }
 
     public function setState($stateCode) {
-        $this->$STATE = $stateCode; 
+        $this->STATE = $stateCode; 
         return 0;
     }
 
     public function getMaxNumOfJobs() {
-        return $this->$MAX_NUM_OF_JOBS; 
+        return $this->MAX_NUM_OF_JOBS; 
     }
 
     public function setMaxNumOfJobs($num) {
-        $this->$MAX_NUM_OF_JOBS = $num;
+        $this->MAX_NUM_OF_JOBS = $num;
         $job = new Job("mod", strval($num), 0);
         // fixme: should send command via protocols 
     }
 
     public function getProcessingJobs() {
         $sqlStmt = "SELECT processing FROM worker where address = " . 
-           $this->$address; 
-        $this->$NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->$dbEntry);
-        return $this->$NUM_OF_PROCESSING_JOBS;
+           $this->address; 
+        $this->NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->dbEntry);
+        return $this->NUM_OF_PROCESSING_JOBS;
     }
 } 
 

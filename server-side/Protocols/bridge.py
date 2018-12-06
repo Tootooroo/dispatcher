@@ -6,7 +6,7 @@ import wrapper
 import time
 import mysql.connector
 from definitions import CONST
-import ../config.CONST as DB_CONST
+import config.CONST as DB_CONST
 
 class TaskManage:
     def __init__(self, taskID):
@@ -43,7 +43,7 @@ class TaskManage:
 class BridgeMsg: 
     # Notes: if content is a string must be convert to ascii before
     #        calling of __init__().
-    def __init__(type_, op_. prop_, taskID_, flags_, content_ = b""):
+    def __init__(type_, op_, prop_, taskID_, flags_, content_ = b""):
         self.__type = type_
         self.__op = op_
         self.__prop = prop_
@@ -67,8 +67,8 @@ class BridgeMsg:
     def type(self):
         return self.__type
     def setType(self, type_):
-        check = type_ != CONST.BRIDGE_TYPE_REQUEST &&
-                type_ != CONST.BRIDGE_TYPE_INFO &&
+        check = type_ != CONST.BRIDGE_TYPE_REQUEST and \
+                type_ != CONST.BRIDGE_TYPE_INFO and \
                 type_ != CONST.BRIDGE_TYPE_MANAGEMENT
         if check:
             return false
@@ -79,8 +79,8 @@ class BridgeMsg:
     def op(self):
         return self.__op
     def setOp(self, op_):
-        check = op_ != CONST.BRIDGE_OP_ENABLE &&
-                op_ != CONST.BRIDGE_OP_DISABLE &&
+        check = op_ != CONST.BRIDGE_OP_ENABLE and \
+                op_ != CONST.BRIDGE_OP_DISABLE and \
                 op_ != CONST.BRIDGE_OP_SET
         if check:
             return false
@@ -151,8 +151,11 @@ class BridgeEntry:
             msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
             msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
             contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
-
-            while chunk = taskMng.retrive(contentSize):
+            
+            while True:
+                chunk = taskMng.retrive(contentSize)
+                if chunk == b'':
+                    break
                 msg.setContent(chunk) 
                 nBytes = Bridge_send(msg.message())
                 if nBytes == 0:
@@ -189,12 +192,16 @@ class BridgeEntry:
                 msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER)
                 
                 contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
-                while chunk = taskMng.retrive(contentSize)
+                while True:
+                    chunk = taskMng.retrive(contentSize)
+                    if chunk == b'':
+                        break
                     msg.setContent(chunk)
                     nBytes = Bridge_send(msg.message())
                     if nBytes == 0:
                         taskMng.rollBack()
                         return False
+
         else:
             msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
             Bridge_send(msg.message())
