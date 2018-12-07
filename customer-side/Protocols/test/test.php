@@ -12,5 +12,6 @@ $port = 8813;
 
 $entry = new BridgeEntry($address, $port);
 $ret = $entry->dispatch(1, "1234");
-echo $ret
+
+
 

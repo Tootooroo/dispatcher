@@ -2,11 +2,13 @@
 
 <?php
 
+// Num of channel rebuild upper bound
+define("BRIDGE_CHANNEL_REBUILD_NUM", 5);
 // Maximum size of buffer
 define("BRIDGE_MAX_SIZE_OF_BUFFER", 1024);
 // Binary buffer format
 define("BRIDGE_FRAME_FORMAT_PACK", "vvvvvIA*");
-define("BRIDGE_FRAME_FORMAT_UNPACK", "vvvvIA*");
+define("BRIDGE_FRAME_FORMAT_UNPACK", "vtype/vop/vprop/vtaskID/vflag/Ilength/A*content");
 // TYPE(2) + OP(2) + PROP(2) + SEQID(2) + FLAG(2) + LEN(4) = 14 Bytes
 define("BRIDGE_FRAME_HEADER_LEN", 14);
 // Entry state
