@@ -1,5 +1,3 @@
-#!/bin/php -q
-
 <?php
 
 include "config.php";

@@ -1,14 +1,11 @@
-#!/bin/php -q 
-
 <?php
 
 function generic_err($msg) {
-    echo $mesg;
+    echo $msg;
 }
 
 function socket_err($func) {
-    echo $func . " " . "failed: reason: " .  \
-        socket_strerror(socket_last_error()) . "\n";
+    echo $func . " " . "failed: reason: " . socket_strerror(socket_last_error()) . "\n";
 }
 
 function swap(&$left, &$right) {
@@ -43,13 +40,13 @@ function sortIntoIndex($array) {
 function SocketConnect_TCP($address, $port) {
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
-        generic_err("Unable to create AF_INET socket.");
+        generic_err("Unable to create AF_INET socket.<br>");
         socket_close($socket);
         return null;
     }
     $ret = socket_connect($socket, $address, $port);
     if ($ret == false) {
-        generic_err("Unable to connect to " . $address . "."); 
+        generic_err("Unable to connect to " . $address . ".<br>"); 
         return null;
     }
 
