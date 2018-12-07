@@ -1,10 +1,8 @@
-#!/bin/php -q
-
 <?php
 
-include "wrapper.php";
-include "definitions.php";
-include "../util.php";
+include "../wrapper.php";
+include "../definitions.php";
+include "../../util.php";
 
 class BridgeMsg {
     private $type;
@@ -87,7 +85,7 @@ class BridgeMsg {
     }
 
     public function message() {
-        $message = pack(BRIDGE_FRAME_FORMAT, $this->type,
+        $message = pack(BRIDGE_FRAME_FORMAT_PACK, $this->type,
             $this->op, $this->property, $this->seqID, 
             $this->flags, $this->length, $this->content);
         return $message; 
@@ -121,8 +119,6 @@ class BridgeEntry {
         $this->waitTask = new splQueue();
         $this->readyTask = new splDoublyLinkedList();
         $this->inProcessing = new splDoublyLinkedList();
-
-        return 0;
     }
 
     public function dispatch($taskID, $content_) {
@@ -134,11 +130,11 @@ class BridgeEntry {
         $this->currentTask = $taskID; 
         $this->inProcessing->add($taskID);
 
-        $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, 0, 0, $taskID, 0, $content_);
+        $item = new BridgeMsg(0x1234, 0, 0, $taskID, 0, $content_);
         $message = $item->message();
          
-        Bridge_send($message, $item->length(), NULL);
-        Bridge_recv($buffer, NULL);  
+        $this->Bridge_send($message, $item->length(), NULL);
+        $this->Bridge_recv($buffer, NULL);  
         if (!BridgeIsReply($buffer)) 
             return FALSE;
 
@@ -156,8 +152,8 @@ class BridgeEntry {
         // fixme: Three handshake may be better for stablility
         //        but Transfer layer provide transfer buffer for us, so it's
         //        not a problem.
-        Bridge_send($item->message(), $item->length(), NULL);
-        Bridge_recv($buffer, NULL);
+        $this->Bridge_send($item->message(), $item->length(), NULL);
+        $this->Bridge_recv($buffer, NULL);
         if (!BridgeIsReply($buffer) || !BridgeIsReadyToSendSet($buffer))
            return FALSE;  
         $ret = $this->Bridge_retrive($receiver, $args);
@@ -175,8 +171,8 @@ class BridgeEntry {
         $buffer = NULL;
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID,
             BRIDGE_FLAG_IS_DONE, BRIDGE_FRAME_HEADER_LEN); 
-        Bridge_send($item->message(), $item->length(), NULL);
-        Bridge_recv($buffer, NULL);
+        $this->Bridge_send($item->message(), $item->length(), NULL);
+        $this->Bridge_recv($buffer, NULL);
         if (!BridgeIsReply($buffer))
             return FALSE;
         if (BridgeIsIsJobDoneSet($buffer))
@@ -246,7 +242,7 @@ class BridgeEntry {
     }
 
     private function CHANNEL_MAINTAIN($RTN, $buffer, $len, $flags, $recover) {
-        $ret = RTN($this->socket, $buffer, $len, $flags); 
+        $ret = $RTN($this->socket, $buffer, $len, $flags); 
         if ($ret == FALSE)
             $this->CHANNEL_REBUILD($recover);
     }
@@ -254,7 +250,7 @@ class BridgeEntry {
     private function CHANNEL_REBUILD($recover) {
         $count = 0;
         while ($count++ < BRIDGE_CHANNEL_REBUILD_NUM) {
-            $this->socket = SocketConnect_TCP($address, $port); 
+            $this->socket = SocketConnect_TCP($this->address, $this->port); 
             if ($this->socket)
                 break;
             sleep(0.1);

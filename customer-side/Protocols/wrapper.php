@@ -1,5 +1,3 @@
-#!/bin/php -a
-
 <?php
 
 /* Send & Recv function */

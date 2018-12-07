@@ -1,5 +1,3 @@
-#!/bin/php -q
-
 <?php
 
 function dataHouseConnect($dataHouseDoor, $host, $userName, $userPass, $dbName) {

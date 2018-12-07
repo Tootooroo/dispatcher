@@ -1,5 +1,3 @@
-#!/bin/php -q
-
 <?php
 
 define("HostIdx", 0);

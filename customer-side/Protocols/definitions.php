@@ -1,5 +1,3 @@
-#!/bin/php -q
-
 <?php
 
 // Num of channel rebuild upper bound
@@ -23,6 +21,7 @@ define("BRIDGE_TYPE_MANAGEMENT", 0x04);
 define("BRIDGE_TYPE_TRANSFER", 0x05);
 
 // Bridge Op Field Constant
+define("BRIDGE_OP_NONE", 0x00); 
 define("BRIDGE_OP_ENABLE", 0x01);
 define("BRIDGE_OP_DISABLE", 0x02);
 define("BRIDGE_OP_SET", 0x03);
@@ -45,5 +44,5 @@ define("BRIDGE_RECOVER_RESTART", 0);
 define("BRIDGE_RECOVER_CONTINUE", 1);
 
 // Bridge Property Field Constant Specific Property is pending
-
+define("BRIDGE_PROP_NONE", 0x00);
 
