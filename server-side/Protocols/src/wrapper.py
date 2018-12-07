@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import struct
 import socket
 import definitions as CONST
 from definitions import CONST 
@@ -18,10 +19,12 @@ def socket_recv_wrapper(sock, buffer_, shouldRecv, flags):
             return False
         buffer_[0] = buffer_[0] + chunk
         shouldRecv = shouldRecv - len(chunk)
+    for i in buffer_[0]:
+        print(i)
 
 # Type filed fetch
 def BridgeFieldFetch(frame, field):
-    header = unpack(CONST.BRIDGE_FRAME_FORMAT_UNPACK, frame[:CONST.BRIDGE_FRAME_HEADER_LEN])
+    header = struct.unpack(CONST.BRIDGE_FRAME_FORMAT_UNPACK, frame[:CONST.BRIDGE_FRAME_HEADER_LEN])
     return header[field]
 def BridgeTypeField(frame):
     return BridgeFieldFetch(frame, CONST.BRIDGE_FRAME_TYPE_OFFSET)

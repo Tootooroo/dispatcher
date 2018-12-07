@@ -4,9 +4,7 @@ import socket
 import struct
 import wrapper
 import time
-import mysql.connector
 from definitions import CONST
-import config.CONST as DB_CONST
 
 class TaskManage:
     def __init__(self, taskID):
@@ -212,10 +210,10 @@ class BridgeEntry:
     def __management(self, frame):
         pass
 
-    def accept(slef):
-        frame = []
+    def accept(self):
+        frame = [b'']
 
-        self.Bridge_recv(frame, flags)
+        self.Bridge_recv(frame, 0)
 
         if wrapper.BridgeIsRequest(frame):
             return self.__requestProcessing(frame)
@@ -231,12 +229,12 @@ class BridgeEntry:
 
     # Protocol data unit
     def Bridge_send(self, frame, flags):
-        return wrapper.socket_send_wrapper(self.sock, frame, flags)
-    def Bridge_recv(self, buffer_, flags):
-        return wrapper.socket_recv_wrapper(self.sock, frame, 
+        return wrapper.socket_send_wrapper(self.__socket, frame, flags)
+    def Bridge_recv(self, frame, flags):
+        return wrapper.socket_recv_wrapper(self.__socket, frame, 
                 CONST.BRIDGE_MAX_SIZE_OF_BUFFER, flags)
     def Bridge_recv_header(self, frameHeader, flags):
-        return wrapper.socket_recv_wrapper(self.sock, frameHeader, 
+        return wrapper.socket_recv_wrapper(self.__socket, frameHeader, 
                 CONST.BRIDGE_FRAME_HEADER_LEN, flags)
     def Bridge_transfer(data): 
         pass  
