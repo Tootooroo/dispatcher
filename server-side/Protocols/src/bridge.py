@@ -4,9 +4,7 @@ import socket
 import struct
 import wrapper
 import time
-import mysql.connector
 from definitions import CONST
-import config.CONST as DB_CONST
 
 class TaskManage:
     def __init__(self, taskID):
@@ -43,7 +41,7 @@ class TaskManage:
 class BridgeMsg: 
     # Notes: if content is a string must be convert to ascii before
     #        calling of __init__().
-    def __init__(type_, op_, prop_, taskID_, flags_, content_ = b""):
+    def __init__(self, type_, op_, prop_, taskID_, flags_, content_ = b""):
         self.__type = type_
         self.__op = op_
         self.__prop = prop_
@@ -56,13 +54,13 @@ class BridgeMsg:
         return self.__flags 
     def setFlags(self, flags_):
         self.__flags = flags_
-        return false
+        return True
 
     def taskID(self):
         return self.__taskID
     def setTaskID(self, taskID_):
         self.__taskID = taskID_
-        return true
+        return True
 
     def type(self):
         return self.__type
@@ -71,10 +69,10 @@ class BridgeMsg:
                 type_ != CONST.BRIDGE_TYPE_INFO and \
                 type_ != CONST.BRIDGE_TYPE_MANAGEMENT
         if check:
-            return false
+            return False
         else:
             self.__type = type_
-            return true
+            return True
     
     def op(self):
         return self.__op
@@ -83,10 +81,10 @@ class BridgeMsg:
                 op_ != CONST.BRIDGE_OP_DISABLE and \
                 op_ != CONST.BRIDGE_OP_SET
         if check:
-            return false
+            return False
         else:
             self.__op = op_
-            return true
+            return True
 
     def content(self):
         return self.__content
@@ -113,7 +111,7 @@ class BridgeEntry:
         self.__socket = sock 
 
     def __newTask(self, taskID):
-        BridgeEntry.__taskTbl[str(taskID)] = TaskManage()
+        BridgeEntry.__taskTbl[str(taskID)] = TaskManage(taskID)
 
     def __rmTask(self, taskID):
         del BridgeEntry.__taskTbl[str(taskID)]
@@ -126,61 +124,70 @@ class BridgeEntry:
         flags = wrapper.BridgeFlagField(frame)  
         content = wrapper.BridgeContentField(frame)
         
-        taskID_str = str(taskID)
+        print("In __requestProcessing")
 
+        taskID_str = str(taskID)
         msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID_str, CONST.BRIDGE_FLAG_ERROR)
 
-        if BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_NOTIFY): 
+        if flags & CONST.BRIDGE_FLAG_NOTIFY:
             # A new task is arrived.
+            msg.setFlags(CONST.BRIDGE_FLAG_ACCEPT)
+
+            # For the consistency of both side we give reply 
+            # first then do job.
+            if self.Bridge_send("12345") == False:
+                return False
+            
             self.__newTask(taskID) 
             return (taskID_str, content)
 
-        elif BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_RECOVER):
+        elif flags & CONST.BRIDGE_FLAG_RECOVER:
             # Recover request
  
             # First to check is the TaskID exist.
             if taskID_str in BridgeEntry.__taskTbl:
                 msg.setFlags(CONST.BRIDGE_FLAG_RECOVER)
-                Bridge_send(msg.message())
+                self.Bridge_send(msg.message())
             else:
                 msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
-                Bridge_send(msg.message())
+                self.Bridge_send(msg.message())
                 return False
             taskMng = BridgeEntry.__taskTbl[taskID_str]
             
             msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
             msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
-            contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
+            contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - \
+                CONST.BRIDGE_FRAME_HEADER_LEN
             
             while True:
                 chunk = taskMng.retrive(contentSize)
                 if chunk == b'':
                     break
                 msg.setContent(chunk) 
-                nBytes = Bridge_send(msg.message())
+                nBytes = self.Bridge_send(msg.message())
                 if nBytes == 0:
                     taskMng.rollBack()
                     return False
 
-        elif BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_IS_JOB_DONE):
+        elif flags & CONST.BRIDGE_FLAG_IS_JOB_DONE:
             # Job processing query
             if taskID_str in BridgeEntry.__taskTbl:
                 if BridgeEntry.__taskTbl[taskID_str].isTaskFinished():
                     msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
-                    Bridge_send(msg.message())  
+                    self.Bridge_send(msg.message())  
                 else:
                     msg.setFlags(CONST.BRIDGE_FLAG_EMPTY) 
-                    Bridge_send(msg.message())
+                    self.Bridge_send(msg.message())
             else:
                 msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
-                Bridge_send(msg.message())
+                self.Bridge_send(msg.message())
                 return False
 
-        elif BridgeFlagFieldCheck(flags, CONST.BRIDGE_FLAG_RETRIVE):
+        elif flags & CONST.BRIDGE_FLAG_RETRIVE:
             # Task result retrive
             if taskID_str in BridgeEntry.__taskTbl:
                 msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
-                Bridge_send(msg.message())
+                self.Bridge_send(msg.message())
 
                 # While a little while
                 # if this delay case performance problem
@@ -197,14 +204,14 @@ class BridgeEntry:
                     if chunk == b'':
                         break
                     msg.setContent(chunk)
-                    nBytes = Bridge_send(msg.message())
+                    nBytes = self.Bridge_send(msg.message())
                     if nBytes == 0:
                         taskMng.rollBack()
                         return False
 
         else:
             msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
-            Bridge_send(msg.message())
+            self.Bridge_send(msg.message())
             
     def __infoProcessing(self, frame):
         pass
@@ -212,17 +219,17 @@ class BridgeEntry:
     def __management(self, frame):
         pass
 
-    def accept(slef):
-        frame = []
+    def accept(self):
+        frame = [b'']
 
-        self.Bridge_recv(frame, flags)
-
-        if wrapper.BridgeIsRequest(frame):
-            return self.__requestProcessing(frame)
-        elif wrapper.BridgeIsInfo(frame):
+        self.Bridge_recv(frame, 0)
+        
+        if wrapper.BridgeIsRequest(frame[0]):
+            return self.__requestProcessing(frame[0])
+        elif wrapper.BridgeIsInfo(frame[0]):
             return self.__infoProcessing
-        elif wrapper.BridgeIsManagement(frame):
-            return self.__management(frame)
+        elif wrapper.BridgeIsManagement(frame[0]):
+            return self.__management(frame[0])
         else:
             return False 
          
@@ -231,12 +238,22 @@ class BridgeEntry:
 
     # Protocol data unit
     def Bridge_send(self, frame, flags):
-        return wrapper.socket_send_wrapper(self.sock, frame, flags)
-    def Bridge_recv(self, buffer_, flags):
-        return wrapper.socket_recv_wrapper(self.sock, frame, 
-                CONST.BRIDGE_MAX_SIZE_OF_BUFFER, flags)
+        return wrapper.socket_send_wrapper(self.__socket, frame, flags)
+    def Bridge_recv(self, frame, flags): 
+        header = [b'']
+        self.Bridge_recv_header(header, 0)
+        
+        contentLen = wrapper.BridgeLengthField(header[0])
+        ret = wrapper.socket_recv_wrapper(self.__socket, frame, 
+                contentLen - CONST.BRIDGE_FRAME_HEADER_LEN, flags)
+        if ret == False:
+            return False
+        frame[0] = header[0] + frame[0]
+        print(wrapper.BridgeContentField(frame[0]))
+        return True
+
     def Bridge_recv_header(self, frameHeader, flags):
-        return wrapper.socket_recv_wrapper(self.sock, frameHeader, 
+        return wrapper.socket_recv_wrapper(self.__socket, frameHeader, 
                 CONST.BRIDGE_FRAME_HEADER_LEN, flags)
     def Bridge_transfer(data): 
         pass  

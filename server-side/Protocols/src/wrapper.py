@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import struct
 import socket
 import definitions as CONST
 from definitions import CONST 
@@ -7,21 +8,24 @@ from definitions import CONST
 def socket_send_wrapper(sock, data, flag):
     shouldSent = len(data)
     while shouldSent > 0:
-        sent = sock.send(data, flag)
+        sent = sock.send(data)
         if sent == 0:
             return False
         shouldSent = shouldSent - sent
+    return True
+
 def socket_recv_wrapper(sock, buffer_, shouldRecv, flags):
     while shouldRecv > 0:
-        chunk = sock.recv(CONST.BRIDGE_MAX_SIZE_OF_BUFFER, flags)
+        chunk = sock.recv(shouldRecv)
         if chunk == b'':
             return False
         buffer_[0] = buffer_[0] + chunk
         shouldRecv = shouldRecv - len(chunk)
+    return True
 
 # Type filed fetch
 def BridgeFieldFetch(frame, field):
-    header = unpack(CONST.BRIDGE_FRAME_FORMAT_UNPACK, frame[:CONST.BRIDGE_FRAME_HEADER_LEN])
+    header = struct.unpack(CONST.BRIDGE_FRAME_FORMAT_UNPACK, frame[:CONST.BRIDGE_FRAME_HEADER_LEN])
     return header[field]
 def BridgeTypeField(frame):
     return BridgeFieldFetch(frame, CONST.BRIDGE_FRAME_TYPE_OFFSET)
@@ -33,12 +37,15 @@ def BridgeTaskIDField(frame):
     return BridgeFieldFetch(frame, CONST.BRIDGE_FRAME_TASKID_OFFSET)
 def BridgeFlagField(frame):
     return BridgeFieldFetch(frame, CONST.BRIDGE_FRAME_FLAG_OFFSET)
+def BridgeLengthField(frame):
+    return BridgeFieldFetch(frame, CONST.BRIDGE_FRAME_LEN_OFFSET)
 def BridgeContentField(frame):
     return frame[CONST.BRIDGE_FRAME_HEADER_LEN:]
 
 # Type field check
 def BridgeTypeFieldCheck(frame, expect):
     type_ = BridgeTypeField(frame)
+    print(type_, expect)
     return type_ == expect
 def BridgeIsRequest(frame):
     return BridgeTypeFieldCheck(frame, CONST.BRIDGE_TYPE_REQUEST)
