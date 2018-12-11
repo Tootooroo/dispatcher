@@ -6,23 +6,19 @@ function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {
         $nBytes = socket_send($socket, $message, $lenShouldSent, $flags);
         if ($nBytes == FALSE || $nBytes == 0) 
             return FALSE;
-        if ($nBytes < $lenShouldSent) {
-            $lenShouldSent = $lenShouldSent - $nBytes;
-            $message = substr($message, -($lenShouldSent)); 
-        }
+        $lenShouldSent = $lenShouldSent - $nBytes;
+        $message = substr($message, -($lenShouldSent)); 
     }
     return $nBytes;
 }
 
-function socket_recv_wrapper($socket, &$buffer, &$lenShouldRecv, $flags) {
+function socket_recv_wrapper($socket, &$buffer, $lenShouldRecv, $flags) {
     while ($lenShouldRecv > 0) {
         $nBytes = socket_recv($socket, $recvBuffer, $lenShouldRecv, $flags);
-        if ($nBytes == FALSE || $nBytes == 0) {
+        if ($nBytes == FALSE) {
             return FALSE; 
         }
-        if ($nBytes < $lenShouldRecv) {
-            $lenShouldRecv = $lenShouldRecv - $nBytes;       
-        }
+        $lenShouldRecv = $lenShouldRecv - $nBytes;       
         $buffer = $buffer . $recvBuffer;  
     }
     return $nBytes; 

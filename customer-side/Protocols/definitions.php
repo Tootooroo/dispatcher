@@ -42,6 +42,7 @@ define("BRIDGE_FLAG_JOB_DONE", 0x0400);
 // Recover options
 define("BRIDGE_RECOVER_RESTART", 0);
 define("BRIDGE_RECOVER_CONTINUE", 1);
+define("BRIDGE_RECOVER_EXIT", 2);
 
 // Bridge Property Field Constant Specific Property is pending
 define("BRIDGE_PROP_NONE", 0x00);

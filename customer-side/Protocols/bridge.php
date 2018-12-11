@@ -130,15 +130,16 @@ class BridgeEntry {
         $this->currentTask = $taskID; 
         $this->inProcessing->add($taskID);
 
-        $item = new BridgeMsg(0x1234, 0, 0, $taskID, 0, $content_);
+        $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, 0, 0, $taskID, 
+            BRIDGE_FLAG_NOTIFY, $content_);
         $message = $item->message();
          
         $this->Bridge_send($message, $item->length(), NULL);
-        $this->Bridge_recv($buffer, NULL);  
-        if (!BridgeIsReply($buffer)) 
+        $this->Bridge_recv($buffer, NULL);
+        
+        if (!BridgeIsReply($buffer) || BridgeIsAcceptSet($buffer)) 
             return FALSE;
-
-        return BridgeIsAccpetSet($buffer);
+        return True;
     } 
  
     // Prototype of receiver is **********
@@ -199,40 +200,41 @@ class BridgeEntry {
 
     /* Lower level connection-related function */
     private function Bridge_send($buffer, $length, $flags) {
-        return $this->CHANNEL_MAINTAIN('socket_send_wrapper', $buffer, $length, $flags); 
+        return $this->CHANNEL_MAINTAIN('socket_send_wrapper', $buffer, 
+            $length, $flags, BRIDGE_RECOVER_RESTART); 
     }
 
-    private function Bridge_recv(&$buffer, $flags, $recover) {     
+    private function Bridge_recv(&$buffer, $flags) {     
         $headerBuffer = null;
 
-        $nBytes = $this->Bridge_recv_header($headerBuffer, $flags);             
+        $nBytes = $this->Bridge_recv_header($headerBuffer, $flags); 
         if ($nBytes == FALSE || Bridge_header_validate($headerBuffer) == FALSE) {
             return FALSE; 
         }
+
         $header = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $headerBuffer); 
         $length = $header['length'];
         $length = $length - BRIDGE_FRAME_HEADER_LEN;
         $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer,
-            $length, $flags, $recover); 
+            $length, $flags, BRIDGE_RECOVER_EXIT); 
         if ($nBytes == FALSE) {
             return FALSE; 
         }
         return $nBytes + BRIDGE_FRAME_HEADER_LEN; 
     }
 
-    private function Bridge_recv_header(&$buffer, $flags, $recover) {
+    private function Bridge_recv_header(&$buffer, $flags) {
         $len = BRIDGE_FRAME_HEADER_LEN;
-        $rlen = &$len; 
         return $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer, 
-            $len, $flags, $recover); 
+            $len, $flags, BRIDGE_RECOVER_EXIT); 
     }
 
-    private function Bridge_retrive($receiver, $args, $recover) {
+    private function Bridge_retrive($receiver, $args) {
         $buffer = null;
         $len = BRIDGE_MAX_SIZE_OF_BUFFER;
         while (TRUE) {
             $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer,
-                $len, NULL, $recover); 
+                $len, NULL, BRIDGE_RECOVER_CONTINUE); 
             if (BridgeIsTransfer($buffer)) {
                 receiver($args, BridgeContentField($buffer));
             } else if (BridgeIsTransDoneSet($buffer)) {
@@ -241,14 +243,25 @@ class BridgeEntry {
         } 
     }
 
-    private function CHANNEL_MAINTAIN($RTN, $buffer, $len, $flags, $recover) {
-        $ret = $RTN($this->socket, $buffer, $len, $flags); 
-        if ($ret == FALSE)
-            $this->CHANNEL_REBUILD($recover);
+    private function CHANNEL_MAINTAIN($RTN, &$buffer, $len, $flags, $recover) {
+        $again = TRUE;
+        
+        while ($again) {
+            $ret = $RTN($this->socket, $buffer, $len, $flags); 
+            if ($ret == FALSE) {
+                $again = $this->CHANNEL_REBUILD($recover);
+            } else {
+                break; 
+            }
+        }
+        return $ret;
     }
 
     private function CHANNEL_REBUILD($recover) {
         $count = 0;
+
+        socket_close($this->socket);
+
         while ($count++ < BRIDGE_CHANNEL_REBUILD_NUM) {
             $this->socket = SocketConnect_TCP($this->address, $this->port); 
             if ($this->socket)
@@ -258,7 +271,7 @@ class BridgeEntry {
 
         if ($this->socket == null)
             return false;
-
+        
         if ($recover == BRIDGE_RECOVER_CONTINUE) {
             $buffer = NULL;
             $recoverReq = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, 
@@ -271,7 +284,12 @@ class BridgeEntry {
                 return FALSE;
             if (!BridgeIsReply($buffer) || !BridgeIsRecoverSet($buffer))
                 return FALSE;
+        } else if ($recover == BRIDGE_RECOVER_EXIT) {
+            return FALSE; 
+        } else if ($recover == BRIDGE_RECOVER_RESTART) {
+            return TRUE; 
         }
+         
         return TRUE;
     }
 }
