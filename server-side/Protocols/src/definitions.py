@@ -11,7 +11,7 @@ class CONST:
 
     # Binary buffer format
     BRIDGE_FRAME_FORMAT_PACK = "HHHHHI%ds"
-    BRIDGE_FRAME_FORMAT_UNPACK = "HHHHHI"
+    BRIDGE_FRAME_FORMAT_UNPACK = "<HHHHHI"
     
     # Frame field offset
     BRIDGE_FRAME_TYPE_OFFSET = 0
