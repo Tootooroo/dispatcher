@@ -10,7 +10,7 @@ class CONST:
     ENTRY_DOWN = 0x00
 
     # Binary buffer format
-    BRIDGE_FRAME_FORMAT_PACK = "HHHHHI%ds"
+    BRIDGE_FRAME_FORMAT_PACK = "<HHHHHI%ds"
     BRIDGE_FRAME_FORMAT_UNPACK = "<HHHHHI"
     
     # Frame field offset
