@@ -24,6 +24,41 @@ function socket_recv_wrapper($socket, &$buffer, $lenShouldRecv, $flags) {
     return $nBytes; 
 }
 
+function Bridge_header_validate($frame) {
+    if ($frame == NULL) 
+        return False;
+    
+    if (strlen($frame) != BRIDGE_FRAME_HEADER_LEN) {
+        return False; 
+    }
+    
+    $type = BridgeTypeField($frame);
+    if ($type < BRIDGE_TYPE_REQUEST || $type > BRIDGE_TYPE_TRANSFER) 
+        return False; 
+
+    $op = BridgeOpField($frame);
+    if ($op < BRIDGE_OP_NONE || $op > BRIDGE_OP_SET) 
+        return False; 
+
+    $prop = BridgePropField($frame);
+    if ($prop != BRIDGE_PROP_NONE) 
+        return False;
+
+    $taskID = BridgeTaskIDField($frame);
+    if ($taskID < 0)
+        return False;
+
+    $flags = BridgeFlagField($frame);
+    if ($flags < BRIDGE_FLAG_NOTIFY || $flags > BRIDGE_FLAG_JOB_DONE) 
+        return False;
+
+    $len = BridgeLengthField($frame);
+    if ($len < BRIDGE_FRAME_HEADER_LEN)
+        return False;
+
+    return True;
+}
+
 /* Field query functions */
 function BridgeTypeField($frame) {
     $frameBuffer = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $frame);
@@ -50,13 +85,15 @@ function BridgeFlagField($frame) {
     return $frameBuffer['flag'];
 }
 
+function BridgeLengthField($frame) {
+    $frameBuffer = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $frame);
+    return $frameBuffer['length'];
+}
+
 function BridgeContentField($frame) {
     $frameBuffer = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $frame);
     return $frameBuffer['content'];
-}
-
-/* Frame related function */
-
+} /* Frame related function */ 
 // Type Field
 function BridgeTypeFieldCheck($frame, $expect) {
     $type = BridgeTypeField($frame);
@@ -127,3 +164,4 @@ function BridgeIsJobDoneSet($frame) {
 function BridgeIsRecoverSet($frame) {
     return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_RECOVER);
 }
+

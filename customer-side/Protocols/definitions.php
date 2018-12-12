@@ -1,5 +1,7 @@
 <?php
 
+// Maximum number of message resend after failed
+define("BRIDGE_RESEND_COUNT", 5);
 // Num of channel rebuild upper bound
 define("BRIDGE_CHANNEL_REBUILD_NUM", 5);
 // Maximum size of buffer
