@@ -7,6 +7,7 @@ from definitions import CONST
 
 def socket_send_wrapper(sock, data, flag):
     shouldSent = len(data)
+    print("total" + str(shouldSent))
     while shouldSent > 0:
         sent = sock.send(data)
         if sent == 0:

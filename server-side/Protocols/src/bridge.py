@@ -89,14 +89,15 @@ class BridgeMsg:
     def content(self):
         return self.__content
     def setContent(self, content_):
-        self.content = content_
+        self.__length = len(content_) + CONST.BRIDGE_FRAME_HEADER_LEN
+        self.__content = content_
 
     def message(self):
         return struct.pack(CONST.BRIDGE_FRAME_FORMAT_PACK % len(self.__content),
                 self.__type, self.__op, self.__prop, self.__taskID, 
                 self.__flags, self.__length, self.__content)       
 
-    def length():
+    def length(self):
         return self.__length
 
 class BridgeEntry:  
@@ -127,7 +128,7 @@ class BridgeEntry:
         print("In __requestProcessing")
 
         taskID_str = str(taskID)
-        msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID_str, CONST.BRIDGE_FLAG_ERROR)
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
 
         if flags & CONST.BRIDGE_FLAG_NOTIFY:
             # A new task is arrived.
@@ -135,7 +136,9 @@ class BridgeEntry:
 
             # For the consistency of both side we give reply 
             # first then do job.
-            if self.Bridge_send("12345") == False:
+            msg.setContent(b'1234')
+            print(msg.length())
+            if self.Bridge_send(msg.message(), 0) == False:
                 return False
             
             self.__newTask(taskID) 
