@@ -1,6 +1,51 @@
 <?php
 
 /* Send & Recv function */
+
+class BridgeList {
+
+    private $list;
+
+    function __construct() {
+        $this->list = new SplDoublyLinkedList(); 
+    }
+    
+    // Found: return index
+    // Not Found: return -1
+    public function search($taskID) {
+        $listHead = $this->list->rewind; 
+        while ($listHead->valid()) {
+            if ($taskID == $listHead->current()) {
+                return $listHead->key(); 
+            } 
+        }
+        return -1;
+    }
+
+    public function add($taskID) {
+        return $this->list->push($taskID); 
+    }
+
+    public function remove($taskID) {
+        $key = $this->search($taskID); 
+        if ($key == -1)
+            return False;
+        $this->list->offsetUnset($key);
+        return True;
+    }
+
+    public function toArray() {
+        $array = array();
+        $listHead = $this->list;
+        
+        while ($listHead->valid()) {
+            array_push($array, $listHead->current());
+            $listHead->next(); 
+        }  
+        return $array;
+    }
+}
+
 function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {
     while ($lenShouldSent > 0) {
         $nBytes = socket_send($socket, $message, $lenShouldSent, $flags);
