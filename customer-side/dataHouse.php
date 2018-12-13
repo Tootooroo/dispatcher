@@ -12,11 +12,11 @@ function dataHouseConnect($dataHouseDoor, $host, $userName, $userPass, $dbName) 
     }
 }
 
-function oneRowFetch($sqlStmt, $conn) {
-    $res = mysql_query($overHeadSql, $conn);
+function sqlRowFetch($sqlStmt, $conn) {
+    $res = mysqli_query($conn, $sqlStmt);
     if ($res) {
-        $row = mysql_fetch_row($res);
-        return $row; 
+        $row = mysqli_fetch_assoc($res);
+        return $row['_msg']; 
     }
     return null;
 }

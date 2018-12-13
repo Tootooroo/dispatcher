@@ -26,3 +26,7 @@ $workerList = array(
     array("id" => "WORKER_1", "addr" => "10.5.2.22", "port" => 8012)
 );
 
+$database = array(
+    "host" => "localhost", "user" => "bridge", "pass" => "bridge", "db" => "Bridge"
+);
+

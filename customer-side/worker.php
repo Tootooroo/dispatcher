@@ -136,17 +136,26 @@ class Worker {
 
     function __construct($ID_, $address_, $port_) {
         $this->ID = $ID_;
+        // Connect to Worker
         $this->bridgeEntry = new BridgeEntry($address_, $port_);
-        $ret = $bridgeEntry->connect();
         $this->isListening = FALSE;
-        $ret == ENTRY_DOWN ? 
+        $ret = $this->bridgeEntry->connectState();
+        $ret == null ? 
             $this->STATE = WORKER_UNKNOWN_STATE :
             $this->STATE = WORKER_NORMAL_STATE;
+         
+        // Connect to database
+        $this->dbEntry = mysqli_connect($database["host"], $database["user"],
+            $database["pass"], $database["db"]); 
+        if (mysqli_connect_errno($this->dbEntry)) {
+            echo "Failed to connect to database: " . mysqli_connect_error();
+            exit; 
+        }
         return 0; 
     }
 
-    public function isJobDone($taskID) {
-        return $bridgeEntry->isJobDone($taskID);  
+    public function isJobReady($taskID) {
+        return $this->bridgeEntry->isJobReady($taskID); 
     }
 
     public function jobReceive($taskID, $receiver, $args) { 
@@ -165,7 +174,7 @@ class Worker {
             return -1; 
         } 
 
-        $this->row = oneRowFetch($overHeadSql, $this->dbEntry);
+        $this->row = sqlRowFetch($overHeadSql, $this->dbEntry);
         $this->NUM_OF_PROCESSING_JOBS = $row[1];
         $this->MAX_NUM_OF_JOBS = $row[2];
         $this->STATE = $row[3];
@@ -208,7 +217,7 @@ class Worker {
     public function getProcessingJobs() {
         $sqlStmt = "SELECT processing FROM worker where address = " . 
            $this->address; 
-        $this->NUM_OF_PROCESSING_JOBS = oneRowFetch($sqlStmt, $this->dbEntry);
+        $this->NUM_OF_PROCESSING_JOBS = sqlRowFetch($sqlStmt, $this->dbEntry);
         return $this->NUM_OF_PROCESSING_JOBS;
     }
 } 

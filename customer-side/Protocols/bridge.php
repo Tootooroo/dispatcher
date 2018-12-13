@@ -106,7 +106,6 @@ class BridgeEntry {
     // The ID of task that in processing.
     private $currentTask; 
     private $readyTask;
-    private $waitTask;
     private $inProcessing;
 
     function __construct($address_, $port_) {
@@ -114,11 +113,17 @@ class BridgeEntry {
         $this->port = $port_; 
         $this->socket = SocketConnect_TCP($address_, $port_);
         $this->state = $this->socket == null ? ENTRY_DOWN : ENTRY_UP;
-
         $this->currentTask = 0;
-        $this->waitTask = new splQueue();
-        $this->readyTask = new splDoublyLinkedList();
-        $this->inProcessing = new splDoublyLinkedList();
+        $this->readyTask = new BridgeList();
+        $this->inProcessing = new BridgeList();
+    }
+    
+    public function connectState() {
+        if ($this->socket == null) {
+            return False; 
+        } else {
+            return True; 
+        }
     }
 
     public function dispatch($taskID, $content_) {
@@ -126,7 +131,6 @@ class BridgeEntry {
 
         // Frame generation.
         $this->currentTask = $taskID; 
-        $this->inProcessing->add($taskID);
 
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, 0, 0, $taskID, 
             BRIDGE_FLAG_NOTIFY, $content_);
@@ -138,6 +142,8 @@ class BridgeEntry {
 
         if (!BridgeIsReply($buffer) || BridgeIsAcceptSet($buffer))
             return False;
+
+        $this->inProcessing.add($taskID);
         return True;
     } 
  
@@ -158,7 +164,7 @@ class BridgeEntry {
 
         $ret = $this->Bridge_retrive($receiver, $args);
         if ($ret == True) {
-            // Remove task from readyTask. 
+            $this->markJobDone($taskID);
         }
         return $ret;
     }
@@ -167,21 +173,53 @@ class BridgeEntry {
         $stmt = "SELECT * FROM taskID FOR UPDATE";    
     }
 
-    public function isJobDone($taskID) {
+    public function isJobReady($taskID) {
         $buffer = NULL;
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, NULL, NULL, $taskID,
             BRIDGE_FLAG_IS_DONE, BRIDGE_FRAME_HEADER_LEN); 
-        $this->Bridge_send($item->message(), $item->length(), NULL);
-        $this->Bridge_recv($buffer, NULL);
+
+        $ret = $this->BRIDGE_REQUEST($item->message(), $buffer, BRIDGE_RESEND_COUNT);
+
         if (!BridgeIsReply($buffer))
             return False;
+
         if (BridgeIsIsJobDoneSet($buffer)) {
-            // Move the task to readyQueue
+            $this->markJobReady($taskID);              
             return True;
+        } else {
+            return False;
         }
-        return False;
     }
     
+    private function markJobReady($taskID) {
+        $process = $this->inProcessing; 
+        $ready = $this->readyTask;
+
+        $idx = $this->inProcessing.search($taskID);
+        if ($idx == -1)
+            return False;
+        $this->inProcessing->remove($taskID);
+        $this->readyTask->add($taskID);
+        return True;
+    }
+
+    private function markJobDone($taskID) {
+        $ready = $this->readyTask; 
+        $idx = $ready->search($taskID);
+        if ($idx == -1)
+            return False;
+        $ready->remove($taskID);
+        return True;
+    }
+
+    public function readyJobs() {
+        return $this->readyTask->toArray();
+    }
+
+    public function inProcessingJobs() {
+        return $this->inProcessing->toArray(); 
+    }
+
     // Return: True  - At least a job is done.
     //         False - None of job is done.
     public function wait() {}
