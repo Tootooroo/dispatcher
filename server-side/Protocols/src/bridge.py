@@ -148,7 +148,7 @@ class BridgeEntry:
             # Recover request
  
             # First to check is the TaskID exist.
-            if taskID_str in BridgeEntry.__taskTbl:
+            if taskID in BridgeEntry.__taskTbl:
                 msg.setFlags(CONST.BRIDGE_FLAG_RECOVER)
                 self.Bridge_send(msg.message())
             else:
@@ -174,7 +174,7 @@ class BridgeEntry:
 
         elif flags & CONST.BRIDGE_FLAG_IS_JOB_DONE:
             # Job processing query
-            if taskID_str in BridgeEntry.__taskTbl:
+            if taskID in BridgeEntry.__taskTbl:
                 if BridgeEntry.__taskTbl[taskID_str].isTaskFinished():
                     msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
                     self.Bridge_send(msg.message())  
@@ -188,7 +188,7 @@ class BridgeEntry:
 
         elif flags & CONST.BRIDGE_FLAG_RETRIVE:
             # Task result retrive
-            if taskID_str in BridgeEntry.__taskTbl:
+            if taskID in BridgeEntry.__taskTbl:
                 msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
                 self.Bridge_send(msg.message())
 
