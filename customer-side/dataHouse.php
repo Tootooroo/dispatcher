@@ -12,7 +12,7 @@ function dataHouseConnect($dataHouseDoor, $host, $userName, $userPass, $dbName) 
     }
 }
 
-function sqlRowFetch($sqlStmt, $conn) {
+function sqlOneRowFetch($sqlStmt, $conn) {
     $res = mysqli_query($conn, $sqlStmt);
     if ($res) {
         $row = mysqli_fetch_assoc($res);

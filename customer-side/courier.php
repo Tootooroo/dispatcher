@@ -174,7 +174,7 @@ class Worker {
             return -1; 
         } 
 
-        $this->row = sqlRowFetch($overHeadSql, $this->dbEntry);
+        $this->row = sqlOneRowFetch($overHeadSql, $this->dbEntry);
         $this->NUM_OF_PROCESSING_JOBS = $row[1];
         $this->MAX_NUM_OF_JOBS = $row[2];
         $this->STATE = $row[3];
@@ -217,7 +217,7 @@ class Worker {
     public function getProcessingJobs() {
         $sqlStmt = "SELECT processing FROM worker where address = " . 
            $this->address; 
-        $this->NUM_OF_PROCESSING_JOBS = sqlRowFetch($sqlStmt, $this->dbEntry);
+        $this->NUM_OF_PROCESSING_JOBS = sqlOneRowFetch($sqlStmt, $this->dbEntry);
         return $this->NUM_OF_PROCESSING_JOBS;
     }
 } 

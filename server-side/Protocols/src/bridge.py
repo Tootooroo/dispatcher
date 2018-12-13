@@ -6,18 +6,41 @@ import wrapper
 import time
 from definitions import CONST
 
-class TaskManage:
-    def __init__(self, taskID):
+class TaskArea:
+    def __init__(self, size):
+        self.__area = {}
+    def enter(self, task):
+        if task.id() in self.__area:
+            return False
+        self.__area.append[task.id()] = task
+    def remove(self, taskID):
+        if task.id() not in self.__area:
+            return False
+        self.__area.pop(taskID)
+    def search(self, taskID):
+        if task.id() not in self.__area:
+            return False
+        return self.__area[taskID]
+
+class TaskInfo:
+    def __init__(self, taskID, entry):
         # Task states 
-        self.taskID = taskID
-        self.lastSeekDistance = 0  
-        self.jobStatus = CONST.BRIDGE_TASK_STATUS_PENDING   
-        self.descriptor = 0
+        self.__taskID = taskID
+        self.__lastSeekDistance = 0  
+        self.__jobStatus = CONST.BRIDGE_TASK_STATUS_PENDING   
+        self.__descriptor = 0
+        self.__entry = entry
 
         # Task callback
         self.__rollback = 0
         self.__retrive = 0
         self.__reset = 0
+    
+    def id():
+        return self.__taskID
+    
+    def content():
+        return self.__content
 
     def rollbackRtnSet(self, rtn):
         self.__rollback = rtn
@@ -112,12 +135,12 @@ class BridgeEntry:
         self.__socket = sock 
 
     def __newTask(self, taskID):
-        BridgeEntry.__taskTbl[str(taskID)] = TaskManage(taskID)
+        BridgeEntry.__taskTbl[str(taskID)] = TaskInfo(taskID)
 
     def __rmTask(self, taskID):
         del BridgeEntry.__taskTbl[str(taskID)]
 
-    def taskTaskManageGet(self, taskID):
+    def taskTaskInfoGet(self, taskID):
         return BridgeEntry.__taskTbl[str(taskID)] 
 
     def __requestProcessing(self, frame):
