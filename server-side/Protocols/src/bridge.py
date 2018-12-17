@@ -28,19 +28,45 @@ class TaskInfo:
         self.__taskID = taskID
         self.__lastSeekDistance = 0  
         self.__jobStatus = CONST.BRIDGE_TASK_STATUS_PENDING   
-        self.__descriptor = 0
         self.__entry = entry
+             
+        # For result store in files
+        self.__path = ''
+        self.__descriptor = 0
+        self.__files = ''
+
+        # For result store in memory buffer
+        self.__buffer = 0
 
         # Task callback
         self.__rollback = 0
         self.__retrive = 0
         self.__reset = 0
     
-    def id():
+    def id(self):
         return self.__taskID
     
-    def content():
-        return self.__content
+    # Files
+    def descriptor(self):
+        return self.__descriptor
+    
+    def path(self):
+        return self.__path
+
+    def setPath(self, path):
+        self.__path = path
+        return True
+    
+    def setFiles(self, files):
+        self.__files = files
+        return True
+
+    def openFileResult(self):
+        return True
+
+    # Memory
+    def bufferFd(self):
+        return self.__buffer
 
     def rollbackRtnSet(self, rtn):
         self.__rollback = rtn
@@ -50,6 +76,17 @@ class TaskInfo:
 
     def resetRtnSet(self, rtn):
         self.__reset = rtn
+
+    def taskStatus(self):
+        return self.__jobStatus
+
+    def setTaskStatus(self, status):
+        if (status < CONST.BRIDGE_TASK_STATUS_FAILED or 
+                status > CONST.BRIDGE_TASK_STATUS_PENDING):
+            return False
+        self.__jobStatus = status
+        return True
+
 
     # Rollback to last success state 
     def rollback(self):
@@ -139,6 +176,14 @@ class BridgeEntry:
 
     def __rmTask(self, taskID):
         del BridgeEntry.__taskTbl[str(taskID)]
+   
+    def taskInfoGet(self, taskID):
+        try:
+            tInfo = self.__taskTbl[taskID]
+        except IndexError:
+            print("taskInfoGet Index Error")
+            return False
+        return tInfo
 
     def taskTaskInfoGet(self, taskID):
         return BridgeEntry.__taskTbl[str(taskID)] 

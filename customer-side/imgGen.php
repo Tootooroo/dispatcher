@@ -65,7 +65,11 @@ function receiver(array $args) {
 
 $content = new Content($url, $branch, $commit);
 $workerHouse = new WorkerHouse(DISPATCH_OVERHEAD, $workerList);
+
+// Mission dispatch
 $ID = $workerHouse->dispatch($content);
+// Mission Result received
+
 $receiver = 'receiver';
 $target_HOST = null;
 $target_bootrom = null;
