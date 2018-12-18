@@ -76,6 +76,7 @@ class WorkerHouse {
     }
 
     public function houseEnter($id, $worker) {
+        // taskID must be unique
         if ($worker) {
             $this->workers[$id] = $worker; 
         }

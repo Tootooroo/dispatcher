@@ -13,3 +13,4 @@ class CONST:
 
     RESULT_PATH = ""
     RESULT_FILES = ["HOST", "BOOTROM"]
+

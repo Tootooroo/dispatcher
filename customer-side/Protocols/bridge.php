@@ -329,7 +329,7 @@ class BridgeEntry {
             $retry = !$this->Bridge_send($beSent, $length, 0); 
             $retry = $retry || !$this->Bridge_recv($received);
             
-            if ($count++ != 0)
+            if ($retry && $count++ != 0)
                sleep(1); 
         }
 

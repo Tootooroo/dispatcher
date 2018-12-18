@@ -32,3 +32,6 @@ class BridgeQueue:
     def count(self):
         return self.__count
 
+if __name__ == '__main__':
+    pass
+
