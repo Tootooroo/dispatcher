@@ -158,6 +158,12 @@ class Worker {
         }
         return 0; 
     }
+    
+    public function connect() {
+        $this->bridgeEnry->connect(); 
+        if ($this->bridgeEnry->connectState() == ENTRY_DOWN)
+            return False;
+    }
 
     public function isJobReady($taskID) {
         return $this->bridgeEntry->isJobReady($taskID); 

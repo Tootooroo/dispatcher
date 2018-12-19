@@ -111,13 +111,18 @@ class BridgeEntry {
     function __construct($address_, $port_) {
         $this->address = $address_;
         $this->port = $port_; 
-        $this->socket = SocketConnect_TCP($address_, $port_);
-        $this->state = $this->socket == null ? ENTRY_DOWN : ENTRY_UP;
+        $this->socket = Null;
+        $this->state = ENTRY_DOWN;
         $this->currentTask = 0;
         $this->readyTask = new BridgeList();
         $this->inProcessing = new BridgeList();
     }
-    
+
+    public function connect() { 
+        $this->socket = SocketConnect_TCP($address_, $port_);
+        $this->state = $this->socket == null ? ENTRY_DOWN : ENTRY_UP;
+    }
+
     public function connectState() {
         if ($this->socket == null) {
             return False; 
