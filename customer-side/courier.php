@@ -77,15 +77,19 @@ class WorkerHouse {
 
     public function houseEnter($id, $worker) {
         // taskID must be unique
-        if ($worker) {
+        if (array_key_exists($id, $this->workers))
+            return False;
+        if ($worker) 
             $this->workers[$id] = $worker; 
-        }
+        return True
     }  
 
     public function houseExit($id) {
+        if (!array_key_exists($id, $this->workers))
+            return False;
         if (array_key_exists($id, $this->workers))
             $this->workers[$id] = null;
-        return 0;
+        return True;
     } 
 
     public function dispatch($job) {
@@ -189,9 +193,8 @@ class Worker {
     // Return taskID of the job.
     public function doJob($job) {
         $taskID = $this->bridgeEnry->taskIDAlloc(); 
-        $content = $job->content();
          
-        if ($bridgeEntry->dispatch($taskID, $content) == FALSE)
+        if ($bridgeEntry->dispatch($taskID, $job) == FALSE)
             $taskID = -1; 
         return array('wID' => $this->ID, 'jID' => $taskID); 
     }
@@ -203,16 +206,6 @@ class Worker {
     public function setState($stateCode) {
         $this->STATE = $stateCode; 
         return 0;
-    }
-
-    public function getMaxNumOfJobs() {
-        return $this->MAX_NUM_OF_JOBS; 
-    }
-
-    public function setMaxNumOfJobs($num) {
-        $this->MAX_NUM_OF_JOBS = $num;
-        $job = new Job("mod", strval($num), 0);
-        // fixme: should send command via protocols 
     }
 
     public function getProcessingJobs() {

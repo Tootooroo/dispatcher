@@ -258,13 +258,14 @@ class BridgeEntry {
 
     private function Bridge_retrive($receiver, $args) {
         $buffer = null;
-        $len = BRIDGE_MAX_SIZE_OF_BUFFER;
         while (True) {
-            $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer,
-                $len, NULL, BRIDGE_RECOVER_CONTINUE); 
+            $this->Bridge_recv($buffer, Null);
             if (BridgeIsTransfer($buffer)) {
                 receiver($args, BridgeContentField($buffer));
-            } else if (BridgeIsTransDoneSet($buffer)) {
+            } else {
+                return False; 
+            }
+            if (BridgeIsTransDoneSet($buffer)) {
                 return True;
             }
         } 

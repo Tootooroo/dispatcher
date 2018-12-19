@@ -2,9 +2,10 @@
 
 import socket
 import struct
-import wrapper
 import time
-from definitions import CONST
+
+import Protocols.src.wrapper
+from Protocols.src.definitions import CONST
 
 class TaskArea:
     def __init__(self, size):
@@ -182,6 +183,9 @@ class BridgeEntry:
             tInfo = self.__taskTbl[taskID]
         except IndexError:
             print("taskInfoGet Index Error")
+            return False
+        except KeyError:
+            print("KeyError")
             return False
         return tInfo
 

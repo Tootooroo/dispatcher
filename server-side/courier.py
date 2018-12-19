@@ -33,5 +33,12 @@ class BridgeQueue:
         return self.__count
 
 if __name__ == '__main__':
-    pass
+    queue = BridgeQueue()
+    
+    values = ["1", "2", "3", "4", "5"]
+    for value in values:
+        queue.enQueue(value)
+    while (queue.count() > 0):
+        print(queue.deQueue(), queue.count())
+
 
