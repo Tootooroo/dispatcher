@@ -81,7 +81,7 @@ class WorkerHouse {
             return False;
         if ($worker) 
             $this->workers[$id] = $worker; 
-        return True
+        return True;
     }  
 
     public function houseExit($id) {
