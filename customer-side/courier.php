@@ -75,6 +75,12 @@ class WorkerHouse {
         return 0;
     }
 
+    public function workerConnect($id) {
+        if (array_key_exists($id, $this->workers))
+            return False;
+        return $this->workers[$id]->connect();
+    }
+
     public function houseEnter($id, $worker) {
         // taskID must be unique
         if (array_key_exists($id, $this->workers))
