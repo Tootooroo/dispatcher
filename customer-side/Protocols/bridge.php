@@ -119,7 +119,7 @@ class BridgeEntry {
     }
 
     public function connect() { 
-        $this->socket = SocketConnect_TCP($address_, $port_);
+        $this->socket = SocketConnect_TCP($this->address, $this->port);
         $this->state = $this->socket == null ? ENTRY_DOWN : ENTRY_UP;
     }
 

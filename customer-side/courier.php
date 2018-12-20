@@ -76,7 +76,7 @@ class WorkerHouse {
     }
 
     public function workerConnect($id) {
-        if (array_key_exists($id, $this->workers))
+        if (!array_key_exists($id, $this->workers))
             return False;
         return $this->workers[$id]->connect();
     }
@@ -166,7 +166,7 @@ class Worker {
     }
     
     public function connect() {
-        $this->bridgeEnry->connect(); 
+        $this->bridgeEntry->connect(); 
         if ($this->bridgeEnry->connectState() == ENTRY_DOWN)
             return False;
     }

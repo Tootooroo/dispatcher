@@ -27,6 +27,6 @@ $workerList = array(
 );
 
 $database = array(
-    "host" => "localhost", "user" => "bridge", "pass" => "bridge", "db" => "Bridge"
+    "host" => "localhost", "user" => "bridge", "pass" => "12345678", "db" => "Bridge"
 );
 
