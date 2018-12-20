@@ -176,6 +176,7 @@ class BridgeEntry {
 
     public function taskIDAlloc() {
         $stmt = "SELECT * FROM taskID FOR UPDATE";    
+        return 1;
     }
 
     public function isJobReady($taskID) {

@@ -80,6 +80,9 @@ class TaskInfo:
 
     def taskStatus(self):
         return self.__jobStatus
+     
+    def getTaskStatus(self):
+        return self.__jobStatus;
 
     def setTaskStatus(self, status):
         if (status < CONST.BRIDGE_TASK_STATUS_FAILED or 
@@ -247,7 +250,8 @@ class BridgeEntry:
         elif flags & CONST.BRIDGE_FLAG_IS_JOB_DONE:
             # Job processing query
             if taskID in BridgeEntry.__taskTbl:
-                if BridgeEntry.__taskTbl[taskID_str].isTaskFinished():
+                if BridgeEntry.__taskTbl[taskID_str].getTaskStatus() == \
+                        CONST.BRIDGE_TASK_STATUS_SUCCESS:
                     msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
                     self.Bridge_send(msg.message())  
                 else:

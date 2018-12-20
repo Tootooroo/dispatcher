@@ -1,18 +1,19 @@
 #!/usr/bin/python
 
 class CONST:
-    DB_USERNAME = ""
-    DB_PASSWORD = ""
-    DB_DATABASE = ""
+    DB_HOST = "localhost"
+    DB_USERNAME = "bridge"
+    DB_PASSWORD = "12345678"
+    DB_DATABASE = "Bridge"
     
-    WORKING_DIR = "D:\\Projects\\ImageGenerator\\Build\\"
-    PROJECT_NAME = ""
+    WORKING_DIR = "/tmp/Build/"
+    PROJECT_NAME = "try"
 
-    COMPILE_ROOT = ""
-    COMPILE_COMMAND = ["", ""]
+    COMPILE_ROOT = "."
+    COMPILE_COMMAND = ["make"]
 
-    RESULT_PATH = ""
-    RESULT_FILES = ["HOST", "BOOTROM"]
+    RESULT_PATH = WORKING_DIR + "/" + PROJECT_NAME
+    RESULT_FILES = ["try"]
 
     COMPRESS_FILE_NAME = "COMPRESS.zip"
 

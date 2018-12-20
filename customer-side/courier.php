@@ -146,6 +146,7 @@ class Worker {
     private $STATE;
 
     function __construct($ID_, $address_, $port_) {
+        global $database;
         $this->ID = $ID_;
         // Connect to Worker
         $this->bridgeEntry = new BridgeEntry($address_, $port_);
