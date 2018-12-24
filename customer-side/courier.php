@@ -185,7 +185,7 @@ class Worker {
     }
 
     public function overHead() {
-        $overHeadSql = "SELECT max, inProc, pending FROM ovherHead where wID = " .
+        $overHeadSql = "SELECT MAX, inProc, pending FROM ovherHead where wID = " .
             $this->ID . ";"; 
     
         if ($this->STATE == WORKER_UNKNOWN_STATE) {
@@ -193,8 +193,8 @@ class Worker {
         } 
 
         $this->row = sqlOneRowFetch($overHeadSql, $this->dbEntry);
-        $this->NUM_OF_PROCESSING_JOBS = $row[1];
-        $this->MAX_NUM_OF_JOBS = $row[0];
+        $this->NUM_OF_PROCESSING_JOBS = $row['inProc'];
+        $this->MAX_NUM_OF_JOBS = $row['MAX'];
 
         // Overhead calculate
         $overHead = ($this->NUM_OF_PROCESSING_JOBS / $this->MAX_NUM_OF_JOBS) 

@@ -34,6 +34,7 @@ class BridgeQueue:
                 "wID = {}".format(CONST.WORKER_ID), 
                 "pending = pending + 1")
         fd.execute(sqlStmt)
+        self.__dbConn.commit()
         fd.close() 
 
         return True
@@ -58,6 +59,7 @@ class BridgeQueue:
                 "wID = {}".format(CONST.WORKER_ID),
                 "inProc = inProc + 1")
         
+        self.__dbConn.commit()
         fd.close()
         return elem
     

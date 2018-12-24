@@ -15,26 +15,22 @@ function swap(&$left, &$right) {
     return 0;
 }
 
-function sortIntoIndex($array) {
+function sortIntoIndex($array, &$indexArray) {
     $numOfElem = count($array, COUNT_NORMAL);
     $sorted = array();
     $middle = null;
 
-    for ($i = 0; i < $numOfElem; $i++) {
-        array_push($sorted, $i); 
-    }
-    
-    for ($i = 1; i < $numOfElem; $i++) {
+    for ($i = 1; $i < $numOfElem; $i++) {
         $middle = $array[$i];
         $middle_s = $i;
         for ($j = $i - 1; $j >= 0 && $array[$j] > $middle; $j--) {
                 $array[$j + 1] = $array[$j]; 
-                $sorted[$j + 1] = $sorted[$j];
+                $indexArray[$j + 1] = $indexArray[$j];
         } 
         $array[$j + 1] = $middle;
-        $sorted[$j + 1] = $middle_s;
+        $indexArray[$j + 1] = $middle_s;
     }
-    return $sorted;
+    return $indexArray;
 }
 
 function SocketConnect_TCP($address, $port) {

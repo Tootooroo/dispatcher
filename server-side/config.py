@@ -10,19 +10,19 @@ class CONST:
     DB_DATABASE = "Bridge"
 
     DB_TABLES_OVERHEAD = (
-        "CREATE TABLE 'overHead' ("
-        "   'ID' INT NOT NULL,"
-        "   'STATE' VARCHAR(5) NOT NULL,"
-        "   PRIMARY KEY ('ID'))"
+        "CREATE TABLE overHead ("
+        "   ID INT NOT NULL,"
+        "   STATE VARCHAR(5) NOT NULL,"
+        "   PRIMARY KEY (ID))"
     )
 
     DB_TABLES_TASKINFO = (
-        "CREATE TABLE 'taskIDInfo' ("
-        "   'wID' INT NOT NULL,"
-        "   'max' INT NOT NULL,"
-        "   'inProc' INT NOT NULL,"
-        "   'pending' INT NOT NULL,"
-        "   PRIMARY KEY ('wID'))"
+        "CREATE TABLE taskIDInfo ("
+        "   wID INT NOT NULL,"
+        "   max INT NOT NULL,"
+        "   inProc INT NOT NULL,"
+        "   pending INT NOT NULL,"
+        "   PRIMARY KEY (wID))"
     )
 
     WORKING_DIR = "/tmp/Build/"
