@@ -168,7 +168,7 @@ class Worker {
     
     public function connect() {
         $this->bridgeEntry->connect(); 
-        if ($this->bridgeEnry->connectState() == ENTRY_DOWN)
+        if ($this->bridgeEntry->connectState() == ENTRY_DOWN)
             return False;
     }
 
@@ -185,8 +185,8 @@ class Worker {
     }
 
     public function overHead() {
-        $overHeadSql = "SELECT overhead FROM worker where address = " .
-            $this->address . ";"; 
+        $overHeadSql = "SELECT max, inProc, pending FROM ovherHead where wID = " .
+            $this->ID . ";"; 
     
         if ($this->STATE == WORKER_UNKNOWN_STATE) {
             return -1; 
@@ -194,8 +194,7 @@ class Worker {
 
         $this->row = sqlOneRowFetch($overHeadSql, $this->dbEntry);
         $this->NUM_OF_PROCESSING_JOBS = $row[1];
-        $this->MAX_NUM_OF_JOBS = $row[2];
-        $this->STATE = $row[3];
+        $this->MAX_NUM_OF_JOBS = $row[0];
 
         // Overhead calculate
         $overHead = ($this->NUM_OF_PROCESSING_JOBS / $this->MAX_NUM_OF_JOBS) 
@@ -222,9 +221,10 @@ class Worker {
     }
 
     public function getProcessingJobs() {
-        $sqlStmt = "SELECT processing FROM worker where address = " . 
-           $this->address; 
-        $this->NUM_OF_PROCESSING_JOBS = sqlOneRowFetch($sqlStmt, $this->dbEntry);
+        $sqlStmt = "SELECT inProc FROM overHead where ID = " . 
+           $this->ID; 
+        $row = sqlOneRowFetch($sqlStmt, $this->dbEntry);
+        $this->NUM_OF_PROCESSING_JOBS = $row[0];
         return $this->NUM_OF_PROCESSING_JOBS;
     }
 } 

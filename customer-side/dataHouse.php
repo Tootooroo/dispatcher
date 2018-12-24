@@ -16,7 +16,7 @@ function sqlOneRowFetch($sqlStmt, $conn) {
     $res = mysqli_query($conn, $sqlStmt);
     if ($res) {
         $row = mysqli_fetch_assoc($res);
-        return $row['_msg']; 
+        return $row; 
     }
     return null;
 }

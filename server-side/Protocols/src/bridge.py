@@ -4,8 +4,9 @@ import socket
 import struct
 import time
 
-import Protocols.src.wrapper
-from Protocols.src.definitions import CONST
+import src.wrapper as wrapper
+from src.definitions import CONST
+from mysql import connector as MConnector
 
 class TaskArea:
     def __init__(self, size):

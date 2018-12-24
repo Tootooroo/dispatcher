@@ -2,7 +2,7 @@
 
 import struct
 import socket
-import Protocols.src.definitions as CONST
+import src.definitions as CONST
 
 def socket_send_wrapper(sock, data, flag):
     shouldSent = len(data)
