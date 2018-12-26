@@ -45,17 +45,18 @@ class WorkerHouse {
          
     private function overheadDispatch($job) {
         $workerRef = $this->workers;
-        $overheadArray = array(); 
+        $overHeadArray = array(); 
+        $indexArray = array();
         $numOfWorkers = $workersRef->count();
 
         // First, query overhead of every worker
-        for ($idx = 0; $idx < $numOfWorkers; $idx++) {
-            $theWorker = $workerRef->offsetGet($idx);
-            array_push($overheadArray, $theWorker->overHead()); 
+        foreach ($workerRef as $id => $worker) {
+            array_push($overHeadArray, $worker->overHead());
+            array_push($indexArray, $id); 
         }
 
         // Second, make decision by the overhead of workers
-        $sorted = sortIntoIndex($overheadArray); 
+        $sorted = sortIntoIndex($overheadArray, $indexArray); 
         // Choose the worker have lowest overhead and useable.
         $choosen = -1;
         foreach ($sorted as $idx) {
@@ -67,7 +68,7 @@ class WorkerHouse {
         // None of worker can handle the job.
         if ($choosen == -1)
             return -1;
-        $theWorker = $workersRef->offsetGet($choosen); 
+        $theWorker = $workersRef[choosen]; 
         
         $ret = $theWorker->doJob($job);  
         if ($ret != 0)
