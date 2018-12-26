@@ -177,14 +177,14 @@ class BridgeEntry:
         self.__socket = sock 
 
     def __newTask(self, taskID):
-        BridgeEntry.__taskTbl[str(taskID)] = TaskInfo(taskID)
+        BridgeEntry.__taskTbl[taskID] = TaskInfo(taskID, self)
 
     def __rmTask(self, taskID):
-        del BridgeEntry.__taskTbl[str(taskID)]
+        del BridgeEntry.__taskTbl[taskID]
    
     def taskInfoGet(self, taskID):
         try:
-            tInfo = self.__taskTbl[taskID]
+            tInfo = BridgeEntry.__taskTbl[taskID]
         except IndexError:
             print("taskInfoGet Index Error")
             return False
@@ -194,7 +194,7 @@ class BridgeEntry:
         return tInfo
 
     def taskTaskInfoGet(self, taskID):
-        return BridgeEntry.__taskTbl[str(taskID)] 
+        return BridgeEntry.__taskTbl[taskID] 
 
     def __requestProcessing(self, frame):
         taskID = wrapper.BridgeTaskIDField(frame) 
@@ -202,8 +202,6 @@ class BridgeEntry:
         content = wrapper.BridgeContentField(frame)
         
         print("In __requestProcessing")
-
-        taskID_str = str(taskID)
         msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
 
         if flags & CONST.BRIDGE_FLAG_NOTIFY:
@@ -213,12 +211,12 @@ class BridgeEntry:
             # For the consistency of both side we give reply 
             # first then do job.
             msg.setContent(b'1234')
-            print(msg.length())
+
             if self.Bridge_send(msg.message(), 0) == False:
                 return False
             
             self.__newTask(taskID) 
-            return (taskID_str, content)
+            return (taskID, content)
 
         elif flags & CONST.BRIDGE_FLAG_RECOVER:
             # Recover request
@@ -231,7 +229,7 @@ class BridgeEntry:
                 msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
                 self.Bridge_send(msg.message())
                 return False
-            taskMng = BridgeEntry.__taskTbl[taskID_str]
+            taskMng = BridgeEntry.__taskTbl[taskID]
             
             msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
             msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
@@ -251,7 +249,7 @@ class BridgeEntry:
         elif flags & CONST.BRIDGE_FLAG_IS_JOB_DONE:
             # Job processing query
             if taskID in BridgeEntry.__taskTbl:
-                if BridgeEntry.__taskTbl[taskID_str].getTaskStatus() == \
+                if BridgeEntry.__taskTbl[taskID].getTaskStatus() == \
                         CONST.BRIDGE_TASK_STATUS_SUCCESS:
                     msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
                     self.Bridge_send(msg.message())  
@@ -302,8 +300,11 @@ class BridgeEntry:
     def accept(self):
         frame = [b'']
 
-        self.Bridge_recv(frame, 0)
-        
+        ret = self.Bridge_recv(frame, 0)
+        if ret == False:
+            return False
+
+
         if wrapper.BridgeIsRequest(frame[0]):
             return self.__requestProcessing(frame[0])
         elif wrapper.BridgeIsInfo(frame[0]):
@@ -321,15 +322,15 @@ class BridgeEntry:
         return wrapper.socket_send_wrapper(self.__socket, frame, flags)
     def Bridge_recv(self, frame, flags): 
         header = [b'']
-        self.Bridge_recv_header(header, 0)
-        
+        ret = self.Bridge_recv_header(header, 0)
+        if ret == False:
+            return False
         contentLen = wrapper.BridgeLengthField(header[0])
         ret = wrapper.socket_recv_wrapper(self.__socket, frame, 
                 contentLen - CONST.BRIDGE_FRAME_HEADER_LEN, flags)
         if ret == False:
             return False
         frame[0] = header[0] + frame[0]
-        print(wrapper.BridgeContentField(frame[0]))
         return True
 
     def Bridge_recv_header(self, frameHeader, flags):

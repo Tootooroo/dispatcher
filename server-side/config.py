@@ -3,11 +3,14 @@
 class CONST:
     WORKER_HOST_ADDR = "127.0.0.1"
     WORKER_HOST_PORT = 8013
-    WORKER_ID = ""
+    WORKER_ID = "0"
     DB_HOST = "localhost"
     DB_USERNAME = "bridge"
     DB_PASSWORD = "12345678"
     DB_DATABASE = "Bridge"
+
+    DB_OVERHEAD_TBL = 'overHead'
+    DB_TASKID_TBL = 'taskIDInfo'
 
     DB_TABLES_OVERHEAD = (
         "CREATE TABLE overHead ("
@@ -18,8 +21,8 @@ class CONST:
 
     DB_TABLES_TASKINFO = (
         "CREATE TABLE taskIDInfo ("
-        "   wID INT NOT NULL,"
-        "   max INT NOT NULL,"
+        "   WORKER_ID INT NOT NULL,"
+        "   MAX INT NOT NULL,"
         "   inProc INT NOT NULL,"
         "   pending INT NOT NULL,"
         "   PRIMARY KEY (wID))"
@@ -31,7 +34,7 @@ class CONST:
     COMPILE_ROOT = "."
     COMPILE_COMMAND = ["make"]
 
-    RESULT_PATH = WORKING_DIR + "/" + PROJECT_NAME
+    RESULT_PATH = "."
     RESULT_FILES = ["try"]
 
     COMPRESS_FILE_NAME = "COMPRESS.zip"

@@ -56,7 +56,7 @@ def row_update(fd, tbl, row, doUpdate):
     except DB_CONN.Error as DB_ERR:
         return DB_ERR.errno
 def table_clear(fd, tbl):
-    fd.execute("DELETE * FROM {}".format(tbl))
+    fd.execute("DELETE FROM {}".format(tbl))
 
 if __name__ == '__main__':
     DB_USERNAME = ""

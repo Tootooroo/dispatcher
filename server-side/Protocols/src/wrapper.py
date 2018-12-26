@@ -2,11 +2,10 @@
 
 import struct
 import socket
-import src.definitions as CONST
+from src.definitions import CONST
 
 def socket_send_wrapper(sock, data, flag):
     shouldSent = len(data)
-    print("total" + str(shouldSent))
     while shouldSent > 0:
         sent = sock.send(data)
         if sent == 0:
@@ -17,7 +16,7 @@ def socket_send_wrapper(sock, data, flag):
 def socket_recv_wrapper(sock, buffer_, shouldRecv, flags):
     while shouldRecv > 0:
         chunk = sock.recv(shouldRecv)
-        if chunk == b'':
+        if not chunk:
             return False
         buffer_[0] = buffer_[0] + chunk
         shouldRecv = shouldRecv - len(chunk)
@@ -45,7 +44,6 @@ def BridgeContentField(frame):
 # Type field check
 def BridgeTypeFieldCheck(frame, expect):
     type_ = BridgeTypeField(frame)
-    print(type_, expect)
     return type_ == expect
 def BridgeIsRequest(frame):
     return BridgeTypeFieldCheck(frame, CONST.BRIDGE_TYPE_REQUEST)

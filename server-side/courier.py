@@ -21,7 +21,7 @@ class BridgeQueue:
         self.__dbConn.close()
 
     def enQueue(self, elem):
-        self.__lock.acquire(timeout = -1)
+        self.__lock.acquire()
 
         self.__queue.insert(0, elem)
         self.__count = self.__count + 1
@@ -33,14 +33,13 @@ class BridgeQueue:
                 "overhead", 
                 "wID = {}".format(CONST.WORKER_ID), 
                 "pending = pending + 1")
-        fd.execute(sqlStmt)
         self.__dbConn.commit()
         fd.close() 
 
         return True
 
     def deQueue(self):
-        self.__lock.acquire(timeout = -1)
+        self.__lock.acquire()
         try:
             elem = self.__queue.pop()
             self.__count = self.__count - 1
