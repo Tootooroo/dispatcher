@@ -11,16 +11,18 @@ class WorkerHouse {
     private $disMethod;
     private $workers;
     private $wareHouse;
-    private $dispatchMethodArrary = array(
-        0 => 'rRobinDispatch',
-        1 => 'overHeadDispatch' 
-    );
+    private $dispatchMethodArrary;
     
     function __construct($disMethod_, $workerSet) {
         $this->disMethod = $disMethod_; 
         
         $this->workers = array();
         $this->wareHouse = array(); 
+        
+        $this->dispatchMethodArray = array(
+            0 => 'rRobinDispatch',
+            1 => 'overHeadDispatch' 
+        );
 
         foreach ($workerSet as $worker) {
             $workerInst = new Worker($worker["id"], $worker["addr"], $worker["port"]);
@@ -47,8 +49,7 @@ class WorkerHouse {
         $workerRef = $this->workers;
         $overHeadArray = array(); 
         $indexArray = array();
-        $numOfWorkers = $workersRef->count();
-
+        $numOfWorkers = count($workerRef);
         // First, query overhead of every worker
         foreach ($workerRef as $id => $worker) {
             array_push($overHeadArray, $worker->overHead());
@@ -64,11 +65,11 @@ class WorkerHouse {
                 continue;
             $choosen = $idx; 
         }  
-
+        
         // None of worker can handle the job.
         if ($choosen == -1)
             return -1;
-        $theWorker = $workersRef[choosen]; 
+        $theWorker = $workerRef[$choosen]; 
         
         $ret = $theWorker->doJob($job);  
         if ($ret != 0)
@@ -99,8 +100,10 @@ class WorkerHouse {
         return True;
     } 
 
-    public function dispatch($job) {
-        $pair = $this->dispatchMethodArrary[$disMethod]($job);        
+    public function dispatch($job) { 
+        $rtn = $this->dispatchMethodArray[$this->disMethod];
+        $pair = $this->$rtn($job);
+
         $wID = $pair['wID'];
         $jID = $pair['jID'];
 
@@ -205,9 +208,9 @@ class Worker {
     
     // Return taskID of the job.
     public function doJob($job) {
-        $taskID = $this->bridgeEnry->taskIDAlloc(); 
-         
-        if ($bridgeEntry->dispatch($taskID, $job) == FALSE)
+        $taskID = $this->bridgeEntry->taskIDAlloc(); 
+
+        if ($this->bridgeEntry->dispatch($taskID, $job) == FALSE)
             $taskID = -1; 
         return array('wID' => $this->ID, 'jID' => $taskID); 
     }

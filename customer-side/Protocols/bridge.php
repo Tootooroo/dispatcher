@@ -329,7 +329,7 @@ class BridgeEntry {
 
     private function BRIDGE_REQUEST($beSent, &$received, $retryCount) {
         $count = 0;
-        $retry = False; 
+        $retry = True; 
         $length = strlen($beSent);
 
         while ($retry && $count < $retryCount) {

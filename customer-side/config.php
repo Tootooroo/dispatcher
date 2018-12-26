@@ -15,15 +15,15 @@ define("ORDER_DO", 0);
 define("ORDER_MOD", 1);
 
 // Dispatch Method
-define("DISPATCH_ROUNDROBIN", 1);
-define("DISPATCH_OVERHEAD", 2);
+define("DISPATCH_ROUNDROBIN", 0);
+define("DISPATCH_OVERHEAD", 1);
 
 // Protocol Bytes
 define("DONE_BYTE", 0x0102);
 define("READ_TO_RECV_BYTE", 0x0304);
 
 $workerList = array(
-    array("id" => "WORKER_1", "addr" => "127.0.0.1", "port" => 8013)
+    array("id" => 0, "addr" => "127.0.0.1", "port" => 8013)
 );
 
 $database = array(
