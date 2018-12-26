@@ -4,6 +4,7 @@ include "config.php";
 include "Protocols/definitions.php";
 include "Protocols/wrapper.php";
 include "Protocols/bridge.php";
+include "dataHouse.php";
 
 class WorkerHouse { 
     // 0: Weigthed Round Robin
@@ -189,17 +190,16 @@ class Worker {
     }
 
     public function overHead() {
-        $overHeadSql = "SELECT MAX, inProc, pending FROM ovherHead where wID = " .
-            $this->ID . ";"; 
-    
+        $overHeadSql = "SELECT MAX, inProc, pending FROM overHead WHERE WORKER_ID = " . $this->ID; 
+
         if ($this->STATE == WORKER_UNKNOWN_STATE) {
             return -1; 
         } 
 
-        $this->row = sqlOneRowFetch($overHeadSql, $this->dbEntry);
+        $row = sqlOneRowFetch($overHeadSql, $this->dbEntry);
         $this->NUM_OF_PROCESSING_JOBS = $row['inProc'];
         $this->MAX_NUM_OF_JOBS = $row['MAX'];
-
+        
         // Overhead calculate
         $overHead = ($this->NUM_OF_PROCESSING_JOBS / $this->MAX_NUM_OF_JOBS) 
             * $this->MAX_NUM_OF_JOBS; 

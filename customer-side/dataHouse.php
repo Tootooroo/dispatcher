@@ -17,6 +17,8 @@ function sqlOneRowFetch($sqlStmt, $conn) {
     if ($res) {
         $row = mysqli_fetch_assoc($res);
         return $row; 
+    } else {
+        echo "Failed to query " . "(" . $conn->errno . "):" . $conn->error;
     }
     return null;
 }
