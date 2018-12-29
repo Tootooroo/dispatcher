@@ -64,6 +64,7 @@ class TaskInfo:
         return True
 
     def openFileResult(self):
+        self.__descriptor = open(self.__path, "r")
         return True
 
     # Memory
@@ -207,10 +208,10 @@ class BridgeEntry:
         if flags & CONST.BRIDGE_FLAG_NOTIFY:
             # A new task is arrived.
             msg.setFlags(CONST.BRIDGE_FLAG_ACCEPT)
+            msg.setContent("")
 
             # For the consistency of both side we give reply 
             # first then do job.
-            msg.setContent(b'1234')
 
             if self.Bridge_send(msg.message(), 0) == False:
                 return False
@@ -237,7 +238,7 @@ class BridgeEntry:
                 CONST.BRIDGE_FRAME_HEADER_LEN
             
             while True:
-                chunk = taskMng.retrive(contentSize)
+                chunk = taskMng.retrive(BridgeEntry.__taskTbl[taskID], contentSize)
                 if chunk == b'':
                     break
                 msg.setContent(chunk) 
@@ -278,9 +279,11 @@ class BridgeEntry:
                 
                 contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
                 while True:
-                    chunk = taskMng.retrive(contentSize)
-                    if chunk == b'':
-                        break
+                    chunk = taskMng.retrive(BridgeEntry.__taskTbl[taskID], contentSize)
+                    if not chunk:
+                        msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER_DONE)
+                        msg.setContent("")
+                        self.Bridge_send(msg.message)
                     msg.setContent(chunk)
                     nBytes = self.Bridge_send(msg.message())
                     if nBytes == 0:
@@ -303,7 +306,6 @@ class BridgeEntry:
         ret = self.Bridge_recv(frame, 0)
         if ret == False:
             return False
-
 
         if wrapper.BridgeIsRequest(frame[0]):
             return self.__requestProcessing(frame[0])

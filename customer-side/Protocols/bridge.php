@@ -4,6 +4,8 @@ include "../wrapper.php";
 include "../definitions.php";
 include "../../util.php";
 
+define("BRIDGE_RET_CODE_NOT_READY", 1)
+
 class BridgeMsg {
     private $type;
     private $op;
@@ -165,7 +167,7 @@ class BridgeEntry {
             return False;
 
         if (!BridgeIsReply($buffer) || !BridgeIsReadyToSendSet($buffer))
-           return False;  
+           return BRIDGE_RET_CODE_NOT_READY;  
 
         $ret = $this->Bridge_retrive($receiver, $args);
         if ($ret == True) {
