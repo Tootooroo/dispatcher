@@ -29,6 +29,7 @@ define("BRIDGE_OP_DISABLE", 0x02);
 define("BRIDGE_OP_SET", 0x03);
 
 // Bridge Flag Field Constant
+define("BRIDGE_FLAG_EMPTY", 0x0000);
 define("BRIDGE_FLAG_NOTIFY", 0x0001);
 define("BRIDGE_FLAG_TRANSFER", 0x0002);
 define("BRIDGE_FLAG_TRANSFER_DONE", 0x0004);

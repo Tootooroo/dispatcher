@@ -103,7 +103,7 @@ function Bridge_header_validate($frame) {
         return False;
 
     $flags = BridgeFlagField($frame);
-    if ($flags < BRIDGE_FLAG_NOTIFY || $flags > BRIDGE_FLAG_JOB_DONE) 
+    if ($flags < BRIDGE_FLAG_EMPTY || $flags > BRIDGE_FLAG_JOB_DONE) 
         return False;
 
     $len = BridgeLengthField($frame);

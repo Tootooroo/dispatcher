@@ -64,7 +64,7 @@ class TaskInfo:
         return True
 
     def openFileResult(self):
-        self.__descriptor = open(self.__path, "r")
+        self.__descriptor = open(self.__path, "rb")
         return True
 
     # Memory
@@ -280,7 +280,7 @@ class BridgeEntry:
                 time.sleep(0.1) 
                 
                 msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
-                msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER)
+                msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
                 
                 taskMng = BridgeEntry.__taskTbl[taskID]
                 contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
