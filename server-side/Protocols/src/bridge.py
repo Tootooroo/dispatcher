@@ -225,10 +225,10 @@ class BridgeEntry:
             # First to check is the TaskID exist.
             if taskID in BridgeEntry.__taskTbl:
                 msg.setFlags(CONST.BRIDGE_FLAG_RECOVER)
-                self.Bridge_send(msg.message())
+                self.Bridge_send(msg.message(), 0)
             else:
                 msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
-                self.Bridge_send(msg.message())
+                self.Bridge_send(msg.message(), 0)
                 return False
             taskMng = BridgeEntry.__taskTbl[taskID]
             
@@ -238,11 +238,11 @@ class BridgeEntry:
                 CONST.BRIDGE_FRAME_HEADER_LEN
             
             while True:
-                chunk = taskMng.retrive(BridgeEntry.__taskTbl[taskID], contentSize)
+                chunk = taskMng.retrive(contentSize)
                 if chunk == b'':
                     break
                 msg.setContent(chunk) 
-                nBytes = self.Bridge_send(msg.message())
+                nBytes = self.Bridge_send(msg.message(), 0)
                 if nBytes == 0:
                     taskMng.rollBack()
                     return False
@@ -253,13 +253,13 @@ class BridgeEntry:
                 if BridgeEntry.__taskTbl[taskID].getTaskStatus() == \
                         CONST.BRIDGE_TASK_STATUS_SUCCESS:
                     msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
-                    self.Bridge_send(msg.message())  
+                    self.Bridge_send(msg.message(), 0)  
                 else:
                     msg.setFlags(CONST.BRIDGE_FLAG_EMPTY) 
-                    self.Bridge_send(msg.message())
+                    self.Bridge_send(msg.message(), 0)
             else:
                 msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
-                self.Bridge_send(msg.message())
+                self.Bridge_send(msg.message(), 0)
                 return False
 
         elif flags & CONST.BRIDGE_FLAG_RETRIVE:
@@ -267,10 +267,10 @@ class BridgeEntry:
             if taskID in BridgeEntry.__taskTbl:
                 if (BridgeEntry.__taskTbl[taskID].getTaskStatus() == CONST.BRIDGE_TASK_STATUS_SUCCESS):
                     msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
-                    self.Bridge_send(msg.message())
+                    self.Bridge_send(msg.message(), 0)
                 else:
                     msg.setFlags(CONST.BRIDGE_FLAG_EMPTY)
-                    self.Bridge_send(msg.message())
+                    self.Bridge_send(msg.message(), 0)
                     return True
 
                 # While a little while
@@ -282,22 +282,23 @@ class BridgeEntry:
                 msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
                 msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER)
                 
+                taskMng = BridgeEntry.__taskTbl[taskID]
                 contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
                 while True:
-                    chunk = taskMng.retrive(BridgeEntry.__taskTbl[taskID], contentSize)
+                    chunk = taskMng.retrive(contentSize)
                     if not chunk:
                         msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER_DONE)
                         msg.setContent("")
-                        self.Bridge_send(msg.message)
+                        self.Bridge_send(msg.message, 0)
                     msg.setContent(chunk)
-                    nBytes = self.Bridge_send(msg.message())
+                    nBytes = self.Bridge_send(msg.message(), 0)
                     if nBytes == 0:
                         taskMng.rollBack()
                         return False
 
         else:
             msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
-            self.Bridge_send(msg.message())
+            self.Bridge_send(msg.message(), 0)
             
     def __infoProcessing(self, frame):
         pass

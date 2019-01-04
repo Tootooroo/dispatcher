@@ -72,10 +72,7 @@ class WorkerHouse {
             return -1;
         $theWorker = $workerRef[$choosen]; 
         
-        $ret = $theWorker->doJob($job);  
-        if ($ret != 0)
-           return -1; 
-        return 0;
+        return $theWorker->doJob($job);  
     }
 
     public function workerConnect($id) {

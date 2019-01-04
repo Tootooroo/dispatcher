@@ -200,7 +200,7 @@ function BridgeIsTransferSet($frame) {
 function BridgeIsTransDoneSet($frame) {
     return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_TRANSFER_DONE);
 }
-function BridgeIsAccpetSet($frame) {
+function BridgeIsAcceptSet($frame) {
     return BridgeFlagFieldCheck($frame, BRIDGE_FLAG_ACCEPT);
 }
 function BridgeIsDeclineSet($frame) {
