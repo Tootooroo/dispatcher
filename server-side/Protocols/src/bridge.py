@@ -265,8 +265,13 @@ class BridgeEntry:
         elif flags & CONST.BRIDGE_FLAG_RETRIVE:
             # Task result retrive
             if taskID in BridgeEntry.__taskTbl:
-                msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
-                self.Bridge_send(msg.message())
+                if (BridgeEntry.__taskTbl[taskID].getTaskStatus() == CONST.BRIDGE_TASK_STATUS_SUCCESS):
+                    msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
+                    self.Bridge_send(msg.message())
+                else:
+                    msg.setFlags(CONST.BRIDGE_FLAG_EMPTY)
+                    self.Bridge_send(msg.message())
+                    return True
 
                 # While a little while
                 # if this delay case performance problem

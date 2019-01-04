@@ -147,8 +147,15 @@ class BridgeEntry {
         if ($ret == False)
            return False; 
 
-        if (!BridgeIsReply($buffer) || BridgeIsAcceptSet($buffer))
+        if (!BridgeIsReply($buffer)) {
+            BRIDGE_DEBUG_MSG("Bridge/dispatch: Is not a reply frame.<br>");
             return False;
+        }
+        
+        if (!BridgeIsAcceptSet($buffer)) {
+            BRIDGE_DEBUG_MSG("Bridge/dispatch: Dispatch is not accepted.<br>");
+            return False;
+        }
 
         $this->inProcessing.add($taskID);
         return True;
@@ -166,8 +173,15 @@ class BridgeEntry {
         if ($ret == False)
             return False;
 
-        if (!BridgeIsReply($buffer) || !BridgeIsReadyToSendSet($buffer))
-           return BRIDGE_RET_CODE_NOT_READY;  
+        if (!BridgeIsReply($buffer)) {
+            BRIDGE_DEBUG_MSG("Bridge/retrive: Is not a reply frame.<br>"); 
+            return False;  
+        }
+        
+        if (!BridgeIsReadyToSendSet($buffer)) {
+            BRIDGE_DEBUG_MSG("Bridge/retrive: Worker is not ready to send.<br>"); 
+            return BRIDGE_RET_CODE_NOT_READY;
+        }
 
         $ret = $this->Bridge_retrive($receiver, $args);
         if ($ret == True) {
@@ -188,8 +202,10 @@ class BridgeEntry {
 
         $ret = $this->BRIDGE_REQUEST($item->message(), $buffer, BRIDGE_RESEND_COUNT);
 
-        if (!BridgeIsReply($buffer))
+        if (!BridgeIsReply($buffer)) {
+            BRIDGE_DEBUG_MSG("Bridge/isJobReady: Is not a reply frame.<br>")
             return False;
+        }
 
         if (BridgeIsIsJobDoneSet($buffer)) {
             $this->markJobReady($taskID);              
@@ -244,6 +260,7 @@ class BridgeEntry {
         $nBytes = $this->Bridge_recv_header($headerBuffer, $flags); 
         $valid = Bridge_header_validate($headerBuffer);
         if ($nBytes == False || $valid == False) {
+            BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Header error.<br>")
             return False; 
         }
         $header = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $headerBuffer); 
@@ -253,6 +270,7 @@ class BridgeEntry {
         $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer,
             $length, $flags, BRIDGE_RECOVER_EXIT); 
         if ($nBytes == False) {
+            BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Connection failed.<br>")
             return False; 
         }
         return $nBytes + BRIDGE_FRAME_HEADER_LEN; 
@@ -271,6 +289,7 @@ class BridgeEntry {
             if (BridgeIsTransfer($buffer)) {
                 receiver($args, BridgeContentField($buffer));
             } else {
+                BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Is not a transfer frame.<br>")
                 return False; 
             }
             if (BridgeIsTransDoneSet($buffer)) {

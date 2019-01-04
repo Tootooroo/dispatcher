@@ -46,6 +46,15 @@ class BridgeList {
     }
 }
 
+define("BRIDGE_DEBUG_OFF", 0);
+define("BRIDGE_DEBUG_ON", 1);
+$BRIDGE_DEBUG_SWITCH = BRIDGE_DEBUG_ON;
+
+function BRIDGE_DEBUG_MSG($msg) {
+    if ($BRIDGE_DEBUG_SWITCH)
+        echo $msg;
+}
+
 function socket_send_wrapper($socket, $message, $lenShouldSent, $flags) {
     while ($lenShouldSent > 0) {
         $nBytes = socket_send($socket, $message, $lenShouldSent, $flags);
