@@ -267,6 +267,8 @@ class BridgeEntry {
         $length = $header['length'];
 
         $length = $length - BRIDGE_FRAME_HEADER_LEN;
+        if ($length == 0) 
+            return True;
         $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer,
             $length, $flags, BRIDGE_RECOVER_EXIT); 
         if ($nBytes == False) {
@@ -309,7 +311,9 @@ class BridgeEntry {
                 break; 
             }
         }
-        return $ret;
+        if ($ret != False)
+            return True;
+        return False;
     }
 
     private function CHANNEL_REBUILD($recover) {

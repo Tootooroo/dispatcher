@@ -208,7 +208,7 @@ class BridgeEntry:
         if flags & CONST.BRIDGE_FLAG_NOTIFY:
             # A new task is arrived.
             msg.setFlags(CONST.BRIDGE_FLAG_ACCEPT)
-            msg.setContent("")
+            msg.setContent(b"")
 
             # For the consistency of both side we give reply 
             # first then do job.
