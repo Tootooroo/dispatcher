@@ -179,7 +179,8 @@ class Worker {
     }
 
     public function jobReceive($taskID, $receiver, $args) { 
-        return $this->bridgeEnry->retrive($taskID, $receiver, $args);
+        echo "jobReceive<br>";
+        return $this->bridgeEntry->retrive($taskID, $receiver, $args);
     }
 
     public function getID() {
@@ -207,7 +208,7 @@ class Worker {
     public function doJob($job) {
         $taskID = $this->bridgeEntry->taskIDAlloc(); 
 
-        if ($this->bridgeEntry->dispatch($taskID, $job) == FALSE)
+        if ($this->bridgeEntry->dispatch($taskID, $job) === FALSE)
             $taskID = -1; 
         return array('wID' => $this->ID, 'jID' => $taskID); 
     }

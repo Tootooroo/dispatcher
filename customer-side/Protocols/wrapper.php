@@ -51,6 +51,7 @@ define("BRIDGE_DEBUG_ON", 1);
 $BRIDGE_DEBUG_SWITCH = BRIDGE_DEBUG_ON;
 
 function BRIDGE_DEBUG_MSG($msg) {
+    global $BRIDGE_DEBUG_SWITCH;
     if ($BRIDGE_DEBUG_SWITCH)
         echo $msg;
 }
