@@ -4,7 +4,7 @@ include "../wrapper.php";
 include "../definitions.php";
 include "../../util.php";
 
-define("BRIDGE_RET_CODE_NOT_READY", 1)
+define("BRIDGE_RET_CODE_NOT_READY", 1);
 
 class BridgeMsg {
     private $type;
