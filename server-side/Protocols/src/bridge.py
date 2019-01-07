@@ -203,6 +203,8 @@ class BridgeEntry:
         content = wrapper.BridgeContentField(frame)
         
         print("In __requestProcessing")
+        print("TaskID is " + str(taskID))
+
         msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
 
         if flags & CONST.BRIDGE_FLAG_NOTIFY:
@@ -295,6 +297,9 @@ class BridgeEntry:
                     if nBytes == 0:
                         taskMng.rollBack()
                         return False
+            else:
+                print("Task Not Found")
+                return False
 
         else:
             msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
