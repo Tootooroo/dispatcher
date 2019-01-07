@@ -288,14 +288,14 @@ class BridgeEntry {
         $buffer = null;
         while (True) {
             $this->Bridge_recv($buffer, Null);
+            if (BridgeIsTransDoneSet($buffer)) {
+                return True;
+            }
             if (BridgeIsTransfer($buffer)) {
                 receiver($args, BridgeContentField($buffer));
             } else {
                 BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Is not a transfer frame.<br>")
                 return False; 
-            }
-            if (BridgeIsTransDoneSet($buffer)) {
-                return True;
             }
         } 
     }
