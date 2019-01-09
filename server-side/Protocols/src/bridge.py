@@ -27,8 +27,10 @@ class TaskArea:
 class TaskInfo:
     def __init__(self, taskID, entry):
         # Task states 
+        self.__sock = ''
         self.__taskID = taskID
-        self.__lastSeekDistance = 0  
+        self.__lastSeekDistance = CONST.BRIDGE_TASK_NET_STATUS_CONNECTED
+        self.__netStat = 0
         self.__jobStatus = CONST.BRIDGE_TASK_STATUS_PENDING   
         self.__entry = entry
              
@@ -45,6 +47,10 @@ class TaskInfo:
         self.__retrive = 0
         self.__reset = 0
     
+    def sockSet(self, sock):
+        self.__sock = sock
+        return True
+
     def id(self):
         return self.__taskID
     
@@ -79,6 +85,15 @@ class TaskInfo:
 
     def resetRtnSet(self, rtn):
         self.__reset = rtn
+        
+    def netStatus(self):
+        return self.__netStat
+
+    def setNetStatus(self, stat):
+        if stat != CONST.BRIDGE_TASK_NET_STATUS_CONNECTED or stat != CONST.BRIDGE_TASK_NET_STATUS_DISCONNECTED:
+            return False
+        self.__netStat = stat
+        return True
 
     def taskStatus(self):
         return self.__jobStatus
@@ -175,6 +190,13 @@ class BridgeEntry:
     __taskTbl = {}
 
     def __init__(self, sock):
+        self.__requestRoutine = {
+            CONST.BRIDGE_FLAG_NOTIFY : self.__newTaskHandle,         
+            CONST.BRIDGE_FLAG_RECOVER : self.__taskRecover,
+            CONST.BRIDGE_FLAG_IS_JOB_DONE : self.__isTaskReady,
+            CONST.BRIDGE_FLAG_RETRIVE : self.__taskRetrive
+        }
+
         # Socket initialization
         self.__socket = sock 
 
@@ -197,6 +219,107 @@ class BridgeEntry:
 
     def taskTaskInfoGet(self, taskID):
         return BridgeEntry.__taskTbl[taskID] 
+    
+    def __newTaskHandle(self, taskID, flags, content):
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ACCEPT)
+        
+        if taskID in BridgeEntry.__taskTbl:
+            msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
+            self.Bridge_send(msg.message(), 0)
+            return True
+
+        self.Bridge_send(msg.message(), 0)
+        
+        self.__newTask(taskID)
+
+        return (taskID, content)
+        
+    def __taskRecover(self, taskID, flags, content):
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_RECOVER)
+
+        if taskID not in BridgeEntry.__taskTbl: 
+            msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
+            self.Bridge_send(msg.message(), 0)
+            return False
+
+        tInfo = BridgeEntry.__taskTbl[taskID]
+        
+        if (tInfo.netStatus() == CONST.BRIDGE_TASK_NET_STATUS_CONNECTED):
+            msg.setFlags(CONST.BRIDGE_FLAG_EMPTY)
+            self.Bridge_send(msg.message(), 0)
+            return True
+
+        tInfo.setNetStatus(CONST.BRIDGE_TASK_NET_STATUS_CONNECTED)
+
+        self.Bridge_send(msg.message(), 0)
+        
+        return True
+         
+    def __isTaskReady(self, taskID, flags, content):
+        # Job processing query
+        if taskID in BridgeEntry.__taskTbl:
+            if BridgeEntry.__taskTbl[taskID].getTaskStatus() == \
+                    CONST.BRIDGE_TASK_STATUS_SUCCESS:
+                msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
+                self.Bridge_send(msg.message(), 0)  
+            else:
+                msg.setFlags(CONST.BRIDGE_FLAG_EMPTY) 
+                self.Bridge_send(msg.message(), 0)
+        else:
+            msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
+            self.Bridge_send(msg.message(), 0)
+            return False
+        return True
+
+    def __taskRetrive(self, taskID, flags, content):
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
+
+        # Task result retrive
+        if taskID in BridgeEntry.__taskTbl:
+            if (BridgeEntry.__taskTbl[taskID].getTaskStatus() == CONST.BRIDGE_TASK_STATUS_SUCCESS):
+                msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
+                self.Bridge_send(msg.message(), 0)
+            else:
+                msg.setFlags(CONST.BRIDGE_FLAG_EMPTY)
+                self.Bridge_send(msg.message(), 0)
+                return True
+
+            # While a little while
+            # if this delay case performance problem
+            # or stable problem we may need to use 
+            # three way hand shake.
+            time.sleep(0.1) 
+            
+            msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
+            msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
+            
+            taskMng = BridgeEntry.__taskTbl[taskID]
+            contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
+            while True:
+                chunk = taskMng.retrive(contentSize)
+
+                # Content print
+                wrapper.BRIDGE_DEBUG_MSG("==========================")
+                wrapper.BRIDGE_DEBUG_MSG("Length of chunk is " + str(len(chunk)))
+                wrapper.BRIDGE_DEBUG_MSG(chunk)        
+
+                if not chunk:
+                    wrapper.BRIDGE_DEBUG_MSG("Transfer done.")
+                    msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER_DONE)
+                    msg.setContent(b"")
+                    self.Bridge_send(msg.message(), 0)
+                    return True
+
+                msg.setContent(chunk)
+
+                nBytes = self.Bridge_send(msg.message(), 0)
+
+                if nBytes == 0:
+                    taskMng.rollBack()
+                    return False
+        else:
+            print("Task Not Found")
+            return False
 
     def __requestProcessing(self, frame):
         taskID = wrapper.BridgeTaskIDField(frame) 
@@ -207,114 +330,10 @@ class BridgeEntry:
         wrapper.BRIDGE_DEBUG_MSG("TaskID is " + str(taskID))
 
         msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
-
-        if flags & CONST.BRIDGE_FLAG_NOTIFY:
-            # A new task is arrived.
-            msg.setFlags(CONST.BRIDGE_FLAG_ACCEPT)
-            msg.setContent(b"")
-
-            # For the consistency of both side we give reply 
-            # first then do job.
-
-            if self.Bridge_send(msg.message(), 0) == False:
-                return False
-            
-            self.__newTask(taskID) 
-            return (taskID, content)
-
-        elif flags & CONST.BRIDGE_FLAG_RECOVER:
-            # Recover request
- 
-            # First to check is the TaskID exist.
-            if taskID in BridgeEntry.__taskTbl:
-                msg.setFlags(CONST.BRIDGE_FLAG_RECOVER)
-                self.Bridge_send(msg.message(), 0)
-            else:
-                msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
-                self.Bridge_send(msg.message(), 0)
-                return False
-            taskMng = BridgeEntry.__taskTbl[taskID]
-            
-            msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
-            msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
-            contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - \
-                CONST.BRIDGE_FRAME_HEADER_LEN
-            
-            while True:
-                chunk = taskMng.retrive(contentSize)
-                if chunk == b'':
-                    break
-                msg.setContent(chunk) 
-                nBytes = self.Bridge_send(msg.message(), 0)
-                if nBytes == 0:
-                    taskMng.rollBack()
-                    return False
-
-        elif flags & CONST.BRIDGE_FLAG_IS_JOB_DONE:
-            # Job processing query
-            if taskID in BridgeEntry.__taskTbl:
-                if BridgeEntry.__taskTbl[taskID].getTaskStatus() == \
-                        CONST.BRIDGE_TASK_STATUS_SUCCESS:
-                    msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE)
-                    self.Bridge_send(msg.message(), 0)  
-                else:
-                    msg.setFlags(CONST.BRIDGE_FLAG_EMPTY) 
-                    self.Bridge_send(msg.message(), 0)
-            else:
-                msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
-                self.Bridge_send(msg.message(), 0)
-                return False
-
-        elif flags & CONST.BRIDGE_FLAG_RETRIVE:
-            # Task result retrive
-            if taskID in BridgeEntry.__taskTbl:
-                if (BridgeEntry.__taskTbl[taskID].getTaskStatus() == CONST.BRIDGE_TASK_STATUS_SUCCESS):
-                    msg.setFlags(CONST.BRIDGE_FLAG_READY_TO_SEND)
-                    self.Bridge_send(msg.message(), 0)
-                else:
-                    msg.setFlags(CONST.BRIDGE_FLAG_EMPTY)
-                    self.Bridge_send(msg.message(), 0)
-                    return True
-
-                # While a little while
-                # if this delay case performance problem
-                # or stable problem we may need to use 
-                # three way hand shake.
-                time.sleep(0.1) 
-                
-                msg.setType(CONST.BRIDGE_TYPE_TRANSFER)
-                msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER)
-                
-                taskMng = BridgeEntry.__taskTbl[taskID]
-                contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
-                while True:
-                    chunk = taskMng.retrive(contentSize)
-
-                    # Content print
-                    wrapper.BRIDGE_DEBUG_MSG("==========================")
-                    wrapper.BRIDGE_DEBUG_MSG("Length of chunk is " + str(len(chunk)))
-                    wrapper.BRIDGE_DEBUG_MSG(chunk)        
-
-                    if not chunk:
-                        wrapper.BRIDGE_DEBUG_MSG("Transfer done.")
-                        msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER_DONE)
-                        msg.setContent(b"")
-                        self.Bridge_send(msg.message(), 0)
-                        return True
-
-                    msg.setContent(chunk)
-
-                    nBytes = self.Bridge_send(msg.message(), 0)
-
-                    if nBytes == 0:
-                        taskMng.rollBack()
-                        return False
-            else:
-                print("Task Not Found")
-                return False
-
-        else:
-            msg.setFlags(CONST.BRIDGE_FLAG_ERROR)
+        
+        try:
+            ret = self.__requestRoutine[flags](taskID, flags, content)
+        except IndexError: 
             self.Bridge_send(msg.message(), 0)
             
     def __infoProcessing(self, frame):
