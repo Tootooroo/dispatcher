@@ -179,7 +179,6 @@ class Worker {
     }
 
     public function jobReceive($taskID, $receiver, $args) { 
-        echo "jobReceive<br>";
         return $this->bridgeEntry->retrive($taskID, $receiver, $args);
     }
 

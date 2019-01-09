@@ -4,7 +4,7 @@ include "../wrapper.php";
 include "../definitions.php";
 include "../../util.php";
 
-define("BRIDGE_RET_CODE_NOT_READY", 1);
+define("BRIDGE_RET_CODE_NOT_READY", 3);
 
 class BridgeMsg {
     private $type;
@@ -257,6 +257,7 @@ class BridgeEntry {
 
     private function Bridge_recv(&$buffer, $flags) {     
         $headerBuffer = null;
+        $contentBuffer = null;
 
         $nBytes = $this->Bridge_recv_header($headerBuffer, $flags); 
         $valid = Bridge_header_validate($headerBuffer);
@@ -267,19 +268,30 @@ class BridgeEntry {
         $header = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $headerBuffer); 
         $length = $header['length'];
 
+        BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Length Field value is " . 
+            $length . "<br>");
         $length = $length - BRIDGE_FRAME_HEADER_LEN;
-    
+
         if ($length == 0) {
             $buffer = $headerBuffer;
             return True;
         }
-        $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $buffer,
+
+        $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $contentBuffer,
             $length, $flags, BRIDGE_RECOVER_EXIT); 
         if ($nBytes == False) {
             BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Connection failed.<br>");
             return False; 
         }
-        $buffer = $headerBuffer + $buffer;
+        
+        BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: " . "Content length is " . 
+            strlen($contentBuffer) . "<br>");
+
+        $buffer = $headerBuffer . $contentBuffer;
+
+        BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Frame len is " . 
+            strlen($buffer) . "<br>");
+        
         return $nBytes + BRIDGE_FRAME_HEADER_LEN; 
     }
 
@@ -293,13 +305,15 @@ class BridgeEntry {
         $buffer = null;
         while (True) {
             $this->Bridge_recv($buffer, Null);
+
             if (BridgeIsTransDoneSet($buffer)) {
+                BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Transfer done.<br>");
                 return True;
             }
             if (BridgeIsTransfer($buffer)) {
-                receiver($args, BridgeContentField($buffer));
+                $receiver($args, BridgeContentField($buffer));
             } else {
-                BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Is not a transfer frame.<br>");
+                BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Is not a transfer frame.");
                 return False; 
             }
         } 
