@@ -133,7 +133,8 @@ class BridgeMsg:
     def setType(self, type_):
         check = type_ != CONST.BRIDGE_TYPE_REQUEST and \
                 type_ != CONST.BRIDGE_TYPE_INFO and \
-                type_ != CONST.BRIDGE_TYPE_MANAGEMENT
+                type_ != CONST.BRIDGE_TYPE_MANAGEMENT and \
+                type_ != CONST.BRIDGE_TYPE_TRANSFER
         if check:
             return False
         else:
@@ -202,8 +203,8 @@ class BridgeEntry:
         flags = wrapper.BridgeFlagField(frame)  
         content = wrapper.BridgeContentField(frame)
         
-        print("In __requestProcessing")
-        print("TaskID is " + str(taskID))
+        wrapper.BRIDGE_DEBUG_MSG("In __requestProcessing")
+        wrapper.BRIDGE_DEBUG_MSG("TaskID is " + str(taskID))
 
         msg = BridgeMsg(CONST.BRIDGE_TYPE_REPLY, 0, 0, taskID, CONST.BRIDGE_FLAG_ERROR)
 
@@ -288,12 +289,23 @@ class BridgeEntry:
                 contentSize = CONST.BRIDGE_MAX_SIZE_OF_BUFFER - CONST.BRIDGE_FRAME_HEADER_LEN
                 while True:
                     chunk = taskMng.retrive(contentSize)
+
+                    # Content print
+                    wrapper.BRIDGE_DEBUG_MSG("==========================")
+                    wrapper.BRIDGE_DEBUG_MSG("Length of chunk is " + str(len(chunk)))
+                    wrapper.BRIDGE_DEBUG_MSG(chunk)        
+
                     if not chunk:
-                        msg.setFlag(CONST.BRIDGE_FLAG_TRANSFER_DONE)
-                        msg.setContent("")
-                        self.Bridge_send(msg.message, 0)
+                        wrapper.BRIDGE_DEBUG_MSG("Transfer done.")
+                        msg.setFlags(CONST.BRIDGE_FLAG_TRANSFER_DONE)
+                        msg.setContent(b"")
+                        self.Bridge_send(msg.message(), 0)
+                        return True
+
                     msg.setContent(chunk)
+
                     nBytes = self.Bridge_send(msg.message(), 0)
+
                     if nBytes == 0:
                         taskMng.rollBack()
                         return False

@@ -4,6 +4,14 @@ import struct
 import socket
 from src.definitions import CONST
 
+BRIDGE_DEBUG_SWITCH = True
+def BRIDGE_DEBUG_MSG(msg):
+    global BRIDGE_DEBUG_SWITCH
+
+    if BRIDGE_DEBUG_SWITCH == False:
+        return True
+    print(msg)
+
 def socket_send_wrapper(sock, data, flag):
     shouldSent = len(data)
     while shouldSent > 0:
