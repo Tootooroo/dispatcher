@@ -324,6 +324,8 @@ class BridgeEntry:
             ret = self.__requestRoutine[flags](taskID, flags, content)
         except IndexError: 
             self.Bridge_send(msg.message(), 0)
+
+        return ret
             
     def __infoProcessing(self, frame):
         pass
