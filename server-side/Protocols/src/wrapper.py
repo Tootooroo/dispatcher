@@ -15,7 +15,11 @@ def BRIDGE_DEBUG_MSG(msg):
 def socket_send_wrapper(sock, data, flag):
     shouldSent = len(data)
     while shouldSent > 0:
-        sent = sock.send(data)
+        try:
+            sent = sock.send(data)
+        except socket.error:
+            sent = 0
+
         if sent == 0:
             return False
         shouldSent = shouldSent - sent
@@ -23,7 +27,11 @@ def socket_send_wrapper(sock, data, flag):
 
 def socket_recv_wrapper(sock, buffer_, shouldRecv, flags):
     while shouldRecv > 0:
-        chunk = sock.recv(shouldRecv)
+        try:
+            chunk = sock.recv(shouldRecv)
+        except socket.error:
+            chunk = b""
+
         if not chunk:
             return False
         buffer_[0] = buffer_[0] + chunk
@@ -98,4 +106,24 @@ def BridgeIsJobDoneSet(frame):
 def BridgeIsRecoverSet(frame):
     return BridgeFlagFieldCheck(frame, CONST.BRIDGE_FLAG_RECOVER)
 
-
+# Verification functions
+def BridgeTypeFieldVerify(type_):
+    if type_ < CONST.BRIDGE_TYPE_REQUEST or type_ > CONST.BRIDGE_TYPE_TRANSFER:
+        return False
+    return True
+def BridgeOpFieldVerify(op_):
+    if op_ < CONST.BRIDGE_OP_ENABLE or op_ > CONST.BRIDGE_OP_SET:
+        return False
+    return True
+def BridgeFlagFieldVerify(flags_):
+    if flags_ < CONST.BRIDGE_FLAG_EMPTY or flags_ > CONST.BRIDGE_FLAG_MAXIMUM:
+        return False
+    return True
+def BridgeTaskStatusValVerify(status_):
+    if status_ < BRIDGE_TASK_STATUS_FAILED or status_ > BRIDGE_TASK_STATUS_PENDING:
+        return False
+    return True
+def BridgeNetStatusValVerify(status_):
+    if status_ < CONST.BRIDGE_TASK_NET_STATUS_DISCONNECTED or status_ > CONST.BRIDGE_TASK_NET_STATUS_CONNECTED:
+        return False
+    return True

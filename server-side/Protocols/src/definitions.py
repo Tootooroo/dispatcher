@@ -46,6 +46,7 @@ class CONST:
     BRIDGE_FLAG_IS_JOB_DONE = 0x0100
     BRIDGE_FLAG_RECOVER = 0x0200
     BRIDGE_FLAG_JOB_DONE = 0x0400
+    BRIDGE_FLAG_MAXIMUM = 0x07ff
 
     # Bridge property field constant specific property is pending
     #
