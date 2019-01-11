@@ -305,7 +305,8 @@ class BridgeEntry:
                     taskMng.rollBack()
                     return False
         else:
-            print("Task Not Found")
+            wrapper.BRIDGE_DEBUG_MSG("Task Not Found")
+            self.Bridge_send(msg.message(), 0)
             return False
 
     def __requestProcessing(self, frame):
