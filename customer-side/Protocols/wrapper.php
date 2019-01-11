@@ -13,7 +13,8 @@ class BridgeList {
     // Found: return index
     // Not Found: return -1
     public function search($taskID) {
-        $listHead = $this->list->rewind; 
+        $listHead = $this->list; 
+        $listHead->rewind();
         while ($listHead->valid()) {
             if ($taskID == $listHead->current()) {
                 return $listHead->key(); 
