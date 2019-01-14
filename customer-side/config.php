@@ -23,7 +23,7 @@ define("DONE_BYTE", 0x0102);
 define("READ_TO_RECV_BYTE", 0x0304);
 
 $workerList = array(
-    array("id" => 0, "addr" => "127.0.0.1", "port" => 8013)
+    array("id" => 0, "addr" => "10.5.4.26", "port" => 8013)
 );
 
 $database = array(

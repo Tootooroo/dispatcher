@@ -9,8 +9,10 @@ def db_connect(user_, password_, host_):
     except DB_CONN.Error as connError:
         if connError.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Username or password mismatch")
-        if connError.errno == errorcode.ER_BAD_DB_ERROR:
+        elif connError.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database doesn not exists")
+        else:
+            print("Mysql connect Error: " + str(connError.errno))
         return False
     return dbConn
 

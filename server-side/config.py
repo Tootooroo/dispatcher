@@ -4,7 +4,7 @@ class CONST:
     WORKER_HOST_ADDR = "127.0.0.1"
     WORKER_HOST_PORT = 8013
     WORKER_ID = "0"
-    DB_HOST = "localhost"
+    DB_HOST = "10.5.2.22"
     DB_USERNAME = "bridge"
     DB_PASSWORD = "12345678"
     DB_DATABASE = "Bridge"
@@ -29,9 +29,9 @@ class CONST:
     )
 
     WORKING_DIR = "/tmp/Build/"
-    PROJECT_NAME = "try"
+    PROJECT_NAME = "OT6800"
 
-    COMPILE_ROOT = "."
+    COMPILE_ROOT = "./gbn/src"
     COMPILE_COMMAND = ["make"]
 
     RESULT_PATH = "."
