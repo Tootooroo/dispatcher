@@ -133,7 +133,7 @@ function BridgePropField($frame) {
 
 function BridgeTaskIDField($frame) {
     $frameBuffer = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $frame);
-    return $frameBuffer['taskid'];
+    return $frameBuffer['taskID'];
 }
 
 function BridgeFlagField($frame) {

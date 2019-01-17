@@ -1,6 +1,6 @@
 <?php
 
-include "config.php";
+include_once "config.php";
 include "Protocols/definitions.php";
 include "Protocols/wrapper.php";
 include "Protocols/bridge.php";
@@ -56,22 +56,24 @@ class WorkerHouse {
             array_push($overHeadArray, $worker->overHead());
             array_push($indexArray, $id); 
         }
-
+        
         // Second, make decision by the overhead of workers
-        $sorted = sortIntoIndex($overheadArray, $indexArray); 
+        $sorted = sortIntoIndex($overHeadArray, $indexArray); 
         // Choose the worker have lowest overhead and useable.
         $choosen = -1;
         foreach ($sorted as $idx) {
-            if ($overheadArray[$idx] == -1)
+            if ($overHeadArray[$idx] == -1)
                 continue;
             $choosen = $idx; 
         }  
-        
+
         // None of worker can handle the job.
-        if ($choosen == -1)
-            return -1;
+        if ($choosen == -1) {
+            return null;
+        }
+
         $theWorker = $workerRef[$choosen]; 
-        
+
         return $theWorker->doJob($job);  
     }
 
@@ -101,6 +103,10 @@ class WorkerHouse {
     public function dispatch($job) { 
         $rtn = $this->dispatchMethodArray[$this->disMethod];
         $pair = $this->$rtn($job);
+        
+        if ($pair == null) {
+            return null;
+        }
 
         $wID = $pair['wID'];
         $jID = $pair['jID'];
@@ -154,7 +160,7 @@ class Worker {
         $this->bridgeEntry = new BridgeEntry($address_, $port_);
         $this->isListening = FALSE;
         $ret = $this->bridgeEntry->connectState();
-        $ret == null ? 
+        $ret == ENTRY_DOWN ? 
             $this->STATE = WORKER_UNKNOWN_STATE :
             $this->STATE = WORKER_NORMAL_STATE;
          
@@ -170,8 +176,13 @@ class Worker {
     
     public function connect() {
         $this->bridgeEntry->connect(); 
-        if ($this->bridgeEntry->connectState() == ENTRY_DOWN)
+        if ($this->bridgeEntry->connectState() == ENTRY_DOWN) {
+            $this->STATE = WORKER_UNKNOWN_STATE;
             return False;
+        } else {
+            $this->STATE = WORKER_NORMAL_STATE;
+            return True;
+        }
     }
 
     public function isJobReady($taskID) {
@@ -206,7 +217,6 @@ class Worker {
     // Return taskID of the job.
     public function doJob($job) {
         $taskID = $this->bridgeEntry->taskIDAlloc(); 
-
         if ($this->bridgeEntry->dispatch($taskID, $job) === FALSE)
             $taskID = -1; 
         return array('wID' => $this->ID, 'jID' => $taskID); 

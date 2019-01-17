@@ -1,8 +1,8 @@
 <?php
 
-include "../wrapper.php";
-include "../definitions.php";
-include "../../util.php";
+include_once "wrapper.php";
+include_once "definitions.php";
+include_once "../dispatcher/customer-side/util.php";
 
 define("BRIDGE_RET_CODE_NOT_READY", 3);
 
@@ -122,15 +122,17 @@ class BridgeEntry {
 
     public function connect() { 
         $this->socket = SocketConnect_TCP($this->address, $this->port);
-        $this->state = $this->socket == null ? ENTRY_DOWN : ENTRY_UP;
+        if ($this->socket == null) {
+            $this->state = ENTRY_DOWN; 
+            return False;
+        } else {
+            $this->state = ENTRY_UP;
+            return True; 
+        }
     }
 
     public function connectState() {
-        if ($this->socket == null) {
-            return False; 
-        } else {
-            return True; 
-        }
+        return $this->state;
     }
 
     public function dispatch($taskID, $content_) {
@@ -378,7 +380,7 @@ class BridgeEntry {
 
         while ($retry && $count < $retryCount) {
             $retry = !$this->Bridge_send($beSent, $length, 0); 
-            $retry = $retry || !$this->Bridge_recv($received);
+            $retry = $retry || !$this->Bridge_recv($received, 0);
             
             if ($retry && $count++ != 0)
                sleep(1); 
