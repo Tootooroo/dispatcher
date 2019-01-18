@@ -106,7 +106,12 @@ class TaskInfo:
             return False
         self.__jobStatus = status
         return True
+    
+    def getTaskID(self):
+        return self.__taskID
 
+    def getEntry(self):
+        return self.__entry
 
     # Rollback to last success state 
     def rollback(self):
@@ -234,6 +239,8 @@ class BridgeEntry:
         return (taskID, content)
         
     def __taskRecover(self, taskID, flags, content):
+        # After recover Worker should be recover to the 
+        # status before the internet broken.
         pass    
 
     def __isTaskReady(self, taskID, flags, content):
@@ -352,13 +359,17 @@ class BridgeEntry:
          
     def done(self):
         pass
+    
+    def infoSend(self, taskID, info):
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taskID, CONST.BRIDGE_FLAG_NOTIFY, info) 
+        self.Bridge_send(msg.message(), 0)
 
     # Protocol data unit
     def Bridge_send(self, frame, flags):
         if wrapper.socket_send_wrapper(self.__socket, frame, flags) == False:
             tInfo = self.taskInfoGet(self.__currentTaskID)
             tInfo.setNetStatus(CONST.BRIDGE_TASK_NET_STATUS_DISCONNECTED)
-            exit(1)
+            return False
 
     def Bridge_recv(self, frame, flags): 
         header = [b'']
@@ -373,7 +384,7 @@ class BridgeEntry:
         if ret == False:
             tInfo = self.taskInfoGet(self.__currentTaskID)
             tInfo.setNetStatus(CONST.BRIDGE_TASK_NET_STATUS_DISCONNECTED)
-            exit(1)
+            return False
 
         frame[0] = header[0] + frame[0]
         return True
