@@ -33,7 +33,8 @@ class TaskInfo:
         self.__netStat = 0
         self.__jobStatus = CONST.BRIDGE_TASK_STATUS_PENDING   
         self.__entry = entry
-             
+        self.__procInfoRetriveArgs = 0     
+
         # For result store in files
         self.__path = ''
         self.__descriptor = 0
@@ -46,14 +47,22 @@ class TaskInfo:
         self.__rollback = 0
         self.__retrive = 0
         self.__reset = 0
-    
+        self.__infoRetrive = 0
+     
     def sockSet(self, sock):
         self.__sock = sock
         return True
 
     def id(self):
         return self.__taskID
+   
+    def procInfoArgsGet(self):
+        return self.__procInfoRetriveArgs
     
+    def procInfoArgsSet(self, args):
+        self.__procInfoRetriveArgs = args
+        return True
+
     # Files
     def descriptor(self):
         return self.__descriptor
@@ -82,6 +91,9 @@ class TaskInfo:
 
     def retriveRtnSet(self, rtn):
         self.__retrive = rtn
+
+    def procInfoRetriRtnSet(self, rtn):
+        self.__infoRetrive = rtn
 
     def resetRtnSet(self, rtn):
         self.__reset = rtn
@@ -122,6 +134,9 @@ class TaskInfo:
 
     def reset(self):
         return self.__reset(self)
+
+    def infoRetrive(self):
+        return self.__infoRetrive(self)
 
 class BridgeMsg: 
     # Notes: if content is a string must be convert to ascii before
@@ -194,7 +209,6 @@ class BridgeEntry:
             CONST.BRIDGE_FLAG_IS_JOB_DONE : self.__isTaskReady,
             CONST.BRIDGE_FLAG_RETRIVE : self.__taskRetrive
         }
-
         # Socket initialization
         self.__socket = sock 
 
@@ -334,9 +348,32 @@ class BridgeEntry:
             self.Bridge_send(msg.message(), 0)
 
         return ret
-            
+    
+    def procInfoRetrive(self, taskID, flags, content):
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taskID, CONST.BRIDGE_FLAG_NOTIFY)
+        tInfo = BridgeEntry.__taskTbl[taskID]  
+
+        infoContent = tInfo.infoRetrive(tInfo)
+        if not infoContent:
+            if tInfo.getTaskStatus == CONST.BRIDGE_TASK_STATUS_SUCCESS:
+                msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE) 
+        msg.setContent(infoContent)
+        self.Bridge_send(msg.message(), 0)
+
+        
     def __infoProcessing(self, frame):
-        pass
+        taskID = wrapper.BridgeTaskIDField(frame)
+        flags = wrapper.BridgeFlagField(frame)
+        content = wrapper.BridgeContentFIeld(frame)
+
+        self.__currentTaskID = taskID
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taksID, CONST.BRIDGE_FLAG_NOTIFY)
+
+        try:
+            ret = procInfoRetrive(taskID, flags, content)
+        except IndexError:
+            self.Bridge_send(msg.message(), 0)
+        return ret
 
     def __management(self, frame):
         pass
@@ -360,10 +397,6 @@ class BridgeEntry:
     def done(self):
         pass
     
-    def infoSend(self, taskID, info):
-        msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taskID, CONST.BRIDGE_FLAG_NOTIFY, info) 
-        self.Bridge_send(msg.message(), 0)
-
     # Protocol data unit
     def Bridge_send(self, frame, flags):
         if wrapper.socket_send_wrapper(self.__socket, frame, flags) == False:
