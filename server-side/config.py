@@ -29,9 +29,9 @@ class CONST:
     )
 
     WORKING_DIR = "/tmp/Build/"
-    PROJECT_NAME = "OT6800"
+    PROJECT_NAME = "try"
 
-    COMPILE_ROOT = "./gbn/src"
+    COMPILE_ROOT = "."
     COMPILE_COMMAND = ["make"]
 
     RESULT_PATH = "."
