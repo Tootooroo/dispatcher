@@ -166,10 +166,11 @@ class BridgeEntry {
 
     public function info($taskID) {
         $frame_recv = null; 
-    
+        
         $this->currentTask = $taskID;
-        $frame = new BridgeMsg(BRIDGE_TYPE_INFO, 0, 0, $taskID, BRIDGE_FLAG_NOTIFY)->message();
-        $ret = $this->BRIDGE_REQUEST($frame, $frame_recv, BRIDGE_RESEND_COUNT); 
+        $item = new BridgeMsg(BRIDGE_TYPE_INFO, 0, 0, $taskID, BRIDGE_FLAG_NOTIFY, "");
+        $frame = $item->message();
+        $ret = $this->BRIDGE_REQUEST($frame, $frame_recv, BRIDGE_RESEND_COUNT, ""); 
         if ($ret == False) {
             echo "BRIDGE_REQUEST() Failed."; 
             return False;
@@ -179,14 +180,17 @@ class BridgeEntry {
             BRIDGE_DEBUG_MSG("Bridge/info: Is not a info frame.<br>"); 
             return False;
         }
-        if (!BridgeIsJobDoneSet($frame_recv)) {
+        
+        if (BridgeIsDeclineSet($frame_recv)) {
+            BRIDGE_DEBUG_MSG("Bridge/info: info is not ready yet.<br>"); 
+            return BRIDGE_RET_CODE_NOT_READY;
+        }
+
+        if (BridgeIsJobDoneSet($frame_recv)) {
             return True;   
         }
         
         $content = BridgeContentField($frame_recv); 
-        if (strlen($content) == 0) {
-            $content = null;
-        }
         return $content;
     }
 
@@ -196,7 +200,7 @@ class BridgeEntry {
         
         $this->currentTask = $taskID;
         $item = new BridgeMsg(BRIDGE_TYPE_REQUEST, 0, 0, $taskID, 
-            BRIDGE_FLAG_RETRIVE, BRIDGE_FRAME_HEADER_LEN); 
+            BRIDGE_FLAG_RETRIVE, ""); 
 
         $ret = $this->BRIDGE_REQUEST($item->message(), $buffer, BRIDGE_RESEND_COUNT); 
         if ($ret == False)

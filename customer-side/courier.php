@@ -191,7 +191,7 @@ class Worker {
     }
     
     public function info($taskID) {
-        return $this->bridgeEnry->info($taskID); 
+        return $this->bridgeEntry->info($taskID); 
     }
 
     public function isJobReady($taskID) {
