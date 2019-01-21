@@ -120,6 +120,11 @@ class WorkerHouse {
 
         return $jID;
     }
+    
+    public function info($taskID) {
+        $worker = $this->workers[$this->wareHouse[$taskID]]; 
+        return $worker->info($taskID);
+    }
 
     public function retrive($taskID, $receiver, $args) {
         $worker = $this->workers[$this->wareHouse[$taskID]];
@@ -183,6 +188,10 @@ class Worker {
             $this->STATE = WORKER_NORMAL_STATE;
             return True;
         }
+    }
+    
+    public function info($taskID) {
+        return $this->bridgeEnry->info($taskID); 
     }
 
     public function isJobReady($taskID) {

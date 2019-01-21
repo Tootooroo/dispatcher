@@ -352,10 +352,17 @@ class BridgeEntry:
     def procInfoRetrive(self, taskID, flags, content):
         msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taskID, CONST.BRIDGE_FLAG_NOTIFY)
         tInfo = BridgeEntry.__taskTbl[taskID]  
-
+        
+        # Info is still not generate in this phase.
+        if tInfo.getTaskStatus() == CONST.BRIDGE_TASK_STATUS_PENDING:
+            msg.setFlags(CONST.BRIDGE_FLAG_DECLINE)
+            self.Bridge_send(msg.message(), 0)
+        
+        # Info transfer
         infoContent = tInfo.infoRetrive(tInfo)
         if not infoContent:
-            if tInfo.getTaskStatus == CONST.BRIDGE_TASK_STATUS_SUCCESS:
+            # Info transfering is done.
+            if tInfo.getTaskStatus() == CONST.BRIDGE_TASK_STATUS_SUCCESS:
                 msg.setFlags(CONST.BRIDGE_FLAG_JOB_DONE) 
         msg.setContent(infoContent)
         self.Bridge_send(msg.message(), 0)
@@ -367,7 +374,7 @@ class BridgeEntry:
         content = wrapper.BridgeContentFIeld(frame)
 
         self.__currentTaskID = taskID
-        msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taksID, CONST.BRIDGE_FLAG_NOTIFY)
+        msg = BridgeMsg(CONST.BRIDGE_TYPE_INFO, 0, 0, taksID, CONST.BRIDGE_FLAG_ERROR)
 
         try:
             ret = procInfoRetrive(taskID, flags, content)
@@ -388,7 +395,7 @@ class BridgeEntry:
         if wrapper.BridgeIsRequest(frame[0]):
             return self.__requestProcessing(frame[0])
         elif wrapper.BridgeIsInfo(frame[0]):
-            return self.__infoProcessing
+            return self.__infoProcessing(frame[0])
         elif wrapper.BridgeIsManagement(frame[0]):
             return self.__management(frame[0])
         else:

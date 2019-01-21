@@ -163,7 +163,33 @@ class BridgeEntry {
         $this->inProcessing->add($taskID);
         return True;
     } 
- 
+
+    public function info($taskID) {
+        $frame_recv = null; 
+    
+        $this->currentTask = $taskID;
+        $frame = new BridgeMsg(BRIDGE_TYPE_INFO, 0, 0, $taskID, BRIDGE_FLAG_NOTIFY)->message();
+        $ret = $this->BRIDGE_REQUEST($frame, $frame_recv, BRIDGE_RESEND_COUNT); 
+        if ($ret == False) {
+            echo "BRIDGE_REQUEST() Failed."; 
+            return False;
+        }
+
+        if (!BridgeIsInfo($frame_recv)) {
+            BRIDGE_DEBUG_MSG("Bridge/info: Is not a info frame.<br>"); 
+            return False;
+        }
+        if (!BridgeIsJobDoneSet($frame_recv)) {
+            return True;   
+        }
+        
+        $content = BridgeContentField($frame_recv); 
+        if (strlen($content) == 0) {
+            $content = null;
+        }
+        return $content;
+    }
+
     // Prototype of receiver is **********
     public function retrive($taskID, $receiver, $args) {
         $buffer = NULL;
