@@ -152,12 +152,12 @@ class BridgeEntry {
         }
 
         if (!BridgeIsReply($buffer)) {
-            BRIDGE_DEBUG_MSG("Bridge/dispatch: Is not a reply frame.<br>");
+            BRIDGE_DEBUG_MSG("Bridge/dispatch: Is not a reply frame.\n");
             return False;
         }
         
         if (!BridgeIsAcceptSet($buffer)) {
-            BRIDGE_DEBUG_MSG("Bridge/dispatch: Dispatch is not accepted.<br>");
+            BRIDGE_DEBUG_MSG("Bridge/dispatch: Dispatch is not accepted.\n");
             return False;
         }
         $this->inProcessing->add($taskID);
@@ -177,12 +177,12 @@ class BridgeEntry {
         }
 
         if (!BridgeIsInfo($frame_recv)) {
-            BRIDGE_DEBUG_MSG("Bridge/info: Is not a info frame.<br>"); 
+            BRIDGE_DEBUG_MSG("Bridge/info: Is not a info frame.\n"); 
             return False;
         }
         
         if (BridgeIsDeclineSet($frame_recv)) {
-            BRIDGE_DEBUG_MSG("Bridge/info: info is not ready yet.<br>"); 
+            BRIDGE_DEBUG_MSG("Bridge/info: info is not ready yet.\n"); 
             return BRIDGE_RET_CODE_NOT_READY;
         }
 
@@ -207,12 +207,12 @@ class BridgeEntry {
             return False;
 
         if (!BridgeIsReply($buffer)) {
-            BRIDGE_DEBUG_MSG("Bridge/retrive: Is not a reply frame.<br>"); 
+            BRIDGE_DEBUG_MSG("Bridge/retrive: Is not a reply frame.\n"); 
             return False;  
         }
         
         if (!BridgeIsReadyToSendSet($buffer)) {
-            BRIDGE_DEBUG_MSG("Bridge/retrive: Worker is not ready to send.<br>"); 
+            BRIDGE_DEBUG_MSG("Bridge/retrive: Worker is not ready to send.\n"); 
             return BRIDGE_RET_CODE_NOT_READY;
         }
 
@@ -236,7 +236,7 @@ class BridgeEntry {
         $ret = $this->BRIDGE_REQUEST($item->message(), $buffer, BRIDGE_RESEND_COUNT);
 
         if (!BridgeIsReply($buffer)) {
-            BRIDGE_DEBUG_MSG("Bridge/isJobReady: Is not a reply frame.<br>");
+            BRIDGE_DEBUG_MSG("Bridge/isJobReady: Is not a reply frame.\n");
             return False;
         }
 
@@ -294,14 +294,14 @@ class BridgeEntry {
         $nBytes = $this->Bridge_recv_header($headerBuffer, $flags); 
         $valid = Bridge_header_validate($headerBuffer);
         if ($nBytes == False || $valid == False) {
-            BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Header error.<br>");
+            BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Header error.\n");
             return False; 
         }
         $header = unpack(BRIDGE_FRAME_FORMAT_UNPACK, $headerBuffer); 
         $length = $header['length'];
 
         BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Length Field value is " . 
-            $length . "<br>");
+            $length . "\n");
         $length = $length - BRIDGE_FRAME_HEADER_LEN;
 
         if ($length == 0) {
@@ -312,17 +312,17 @@ class BridgeEntry {
         $nBytes = $this->CHANNEL_MAINTAIN('socket_recv_wrapper', $contentBuffer,
             $length, $flags, BRIDGE_RECOVER_EXIT); 
         if ($nBytes == False) {
-            BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Connection failed.<br>");
+            BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Connection failed.\n");
             return False; 
         }
         
         BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: " . "Content length is " . 
-            strlen($contentBuffer) . "<br>");
+            strlen($contentBuffer) . "\n");
 
         $buffer = $headerBuffer . $contentBuffer;
 
         BRIDGE_DEBUG_MSG("Bridge/Bridge_recv: Frame len is " . 
-            strlen($buffer) . "<br>");
+            strlen($buffer) . "\n");
         
         return $nBytes + BRIDGE_FRAME_HEADER_LEN; 
     }
@@ -339,7 +339,7 @@ class BridgeEntry {
             $this->Bridge_recv($buffer, Null);
 
             if (BridgeIsTransDoneSet($buffer)) {
-                BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Transfer done.<br>");
+                BRIDGE_DEBUG_MSG("Bridge/Bridge_retrive: Transfer done.\n");
                 return True;
             }
             if (BridgeIsTransfer($buffer)) {
