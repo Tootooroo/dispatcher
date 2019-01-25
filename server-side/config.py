@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 class CONST:
-    WORKER_HOST_ADDR = "127.0.0.1"
+    WORKER_HOST_ADDR = "10.5.4.26"
     WORKER_HOST_PORT = 8013
     WORKER_ID = "0"
     DB_HOST = "10.5.2.22"
@@ -28,15 +28,20 @@ class CONST:
         "   PRIMARY KEY (wID))"
     )
 
-    WORKING_DIR = "/tmp/Build/"
-    PROJECT_NAME = "try"
+    WORKING_DIR = "E:/WORKING_DIR/"
+    PROJECT_NAME = "OT6800"
 
-    COMPILE_ROOT = "."
-    COMPILE_COMMAND = ["make"]
+    COMPILE_ROOT = "./gbn/src"
+    COMPILE_COMMAND = [
+        ".\\TiNetS8600_build_bootrom.bat 1",
+        ".\\TiNetS8600_build_host.bat 1"
+    ]
 
-    RESULT_PATH = "."
-    RESULT_FILES = ["try"]
+    RESULT_FILES = [
+        # ControlBoard 
+        ["boot/config/OT6800_CONTROL_BSP/image/", "bootrom_flash.bin", "host.arj"]
+    ]
 
     COMPRESS_FILE_NAME = "COMPRESS.zip"
 
-    COMPILE_INFO_TRANSFER_BYTES = 2048
+    COMPILE_INFO_TRANSFER_BYTES = 4096
