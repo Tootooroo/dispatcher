@@ -11,6 +11,7 @@ class CONST:
 
     DB_OVERHEAD_TBL = 'overHead'
     DB_TASKID_TBL = 'taskIDInfo'
+    DB_IDSEED_TBL = 'idSeed'
 
     DB_TABLES_OVERHEAD = (
         "CREATE TABLE overHead ("
@@ -26,6 +27,12 @@ class CONST:
         "   inProc INT NOT NULL,"
         "   pending INT NOT NULL,"
         "   PRIMARY KEY (wID))"
+    )
+
+    DB_TABLES_IDSEED = (
+        "CREATE TABLE idSeed ("         
+        "   seed INT NOT NULL"
+        ")"
     )
 
     WORKING_DIR = "E:/WORKING_DIR/"
