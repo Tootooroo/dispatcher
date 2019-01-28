@@ -2,6 +2,7 @@
 
 include_once "wrapper.php";
 include_once "definitions.php";
+include_once "../dispatcher/customer-side/config.php";
 include_once "../dispatcher/customer-side/util.php";
 
 define("BRIDGE_RET_CODE_NOT_READY", 3);
@@ -255,7 +256,7 @@ class BridgeEntry {
         if ($seed > BRIDGE_MAXIMUM_TASK_ID) 
             $taskID = 0; 
 
-        if ($dbEntry->query("UPDATE idSeed SET seed = " $seed) === False) {
+        if ($dbEntry->query("UPDATE idSeed SET seed = " . $seed) === False) {
             echo "UPDATE for idSeed failed.\n"; 
             exit(1);
         }
@@ -464,11 +465,12 @@ class BridgeEntry {
 
 
 // Unit Testing
-function unitTesting() {
+function taskIDAlloc_testing() {
     $bridgeEntry = new BridgeEntry("123", 11);
     $taskID = $bridgeEntry->taskIDAlloc();
     echo $taskID;
 }
-
-unitTesting();
+function unitTesting() {
+    taskIDAlloc_testing();
+}
 
