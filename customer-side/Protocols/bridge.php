@@ -157,7 +157,7 @@ class BridgeEntry {
         $message = $item->message();
 
         $ret = $this->BRIDGE_REQUEST($message, $buffer, BRIDGE_RESEND_COUNT); 
-        if ($ret == False) {
+        if ($ret === False) {
             echo "BRIDGE_REQUEST Failed.";
            return False; 
         }
@@ -182,7 +182,7 @@ class BridgeEntry {
         $item = new BridgeMsg(BRIDGE_TYPE_INFO, 0, 0, $taskID, BRIDGE_FLAG_NOTIFY, "");
         $frame = $item->message();
         $ret = $this->BRIDGE_REQUEST($frame, $frame_recv, BRIDGE_RESEND_COUNT, ""); 
-        if ($ret == False) {
+        if ($ret === False) {
             echo "BRIDGE_REQUEST() Failed."; 
             return False;
         }
@@ -451,7 +451,7 @@ class BridgeEntry {
         $length = strlen($beSent);
 
         while ($retry && $count < $retryCount) {
-            $retry = !$this->Bridge_send($beSent, $length, 0); 
+            $retry = False || !$this->Bridge_send($beSent, $length, 0); 
             $retry = $retry || !$this->Bridge_recv($received, 0);
             
             if ($retry && $count++ != 0)
