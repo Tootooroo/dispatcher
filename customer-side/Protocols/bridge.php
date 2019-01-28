@@ -111,6 +111,8 @@ class BridgeEntry {
     private $inProcessing;
 
     function __construct($address_, $port_) {
+        global $database;
+
         $this->address = $address_;
         $this->port = $port_; 
         $this->socket = Null;
@@ -118,6 +120,15 @@ class BridgeEntry {
         $this->currentTask = 0;
         $this->readyTask = new BridgeList();
         $this->inProcessing = new BridgeList();
+
+        $dbEntry = new mysqli($database['host'], $database['user'],
+            $database['pass'], $database['db']);
+        if ($dbEntry->connect_errno) {
+            echo "Failed to connect to Mysql: " . $dbEntry->connect_errno . " - " .
+                $dbEntry->connect_error . ".\n";
+            exit(1);
+        }
+        $this->dbEntry = $dbEntry;
     }
 
     public function connect() { 
@@ -224,8 +235,39 @@ class BridgeEntry {
     }
 
     public function taskIDAlloc() {
-        $stmt = "SELECT * FROM taskID FOR UPDATE";    
-        return 1;
+        $taskID = 0;
+        $seed = 0;
+        $dbEntry = $this->dbEntry;
+
+        $dbEntry->autocommit(False);
+
+        $result = $dbEntry->query("SELECT seed FROM idSeed FOR UPDATE");
+        if ($result === False) {
+            echo "SELECT for idSeed failed.\n"; 
+            exit(1);
+        }
+
+        $row = $result->fetch_assoc();
+        $seed = $row['seed'];
+        $taskID = $seed;
+        
+        $seed += 1;
+        if ($seed > BRIDGE_MAXIMUM_TASK_ID) 
+            $taskID = 0; 
+
+        if ($dbEntry->query("UPDATE idSeed SET seed = " $seed) === False) {
+            echo "UPDATE for idSeed failed.\n"; 
+            exit(1);
+        }
+
+        if ($dbEntry->commit() === False) {
+            echo "Commit failed.\n"; 
+            exit(1);
+        }
+
+        $dbEntry->autocommit(True);
+
+        return $taskID;
     }
 
     public function isJobReady($taskID) {
@@ -420,4 +462,13 @@ class BridgeEntry {
     }
 }
 
+
+// Unit Testing
+function unitTesting() {
+    $bridgeEntry = new BridgeEntry("123", 11);
+    $taskID = $bridgeEntry->taskIDAlloc();
+    echo $taskID;
+}
+
+unitTesting();
 

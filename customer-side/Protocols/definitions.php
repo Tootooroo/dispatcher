@@ -1,5 +1,7 @@
 <?php
 
+// Maximum of taskID
+define("BRIDGE_MAXIMUM_TASK_ID", 500);
 // Maximum number of message resend after failed
 define("BRIDGE_RESEND_COUNT", 5);
 // Num of channel rebuild upper bound
